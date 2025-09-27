@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import { Archivo, Overpass } from "next/font/google";
+import React from 'react'
+import { Archivo } from "next/font/google";
 import "./globals.css";
 
 const archivo = Archivo({
-  subsets: ["latin"],
-});
-
-const overpass = Overpass({
   subsets: ["latin"],
 });
 
@@ -23,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${archivo.className} ${overpass.className} antialiased`}
+        className={`${archivo.className} bg-black antialiased`}
       >
         {children}
       </body>

@@ -4,7 +4,7 @@ import ArrowDown from "./symbols/ArrowDown";
 
 export default function Navigation() {
   return (
-    <nav className="flex px-16 h-19 items-center justify-between bg-black ">
+    <nav className="flex px-4 md:px-8 xl:px-16 h-19 items-center justify-between container mx-auto bg-black ">
       <div className="flex gap-7 items-center">
         <Logo />
 

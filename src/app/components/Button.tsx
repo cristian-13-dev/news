@@ -12,7 +12,7 @@ export default function Button({ type, label }: ButtonProps) {
   let classType;
 
     if(type === "main") { classType = `${baseClasses} bg-white text-black border-white`} 
-    if (type === 'secondary') { classType = `${baseClasses} bg-black text-white border border-1 border-neutral-500`} 
+    if (type === 'secondary') { classType = `${baseClasses} bg-neutral-900 text-white border border-1 border-neutral-700`}
     if (type === 'close') { label = <Close/>}
     if (type === 'hamburger') { label = <Hamburger/>}
   return <button className={`${classType}`}>{label}</button>;
