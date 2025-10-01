@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@theme {
+  /* Pastel */
+  --lightest: #F2F2F2;
+  --lighter: #D8D8D8;
+
+  /* Mid-Tone */
+  --neutral-light: #B2B2B2;
+  --neutral: #7F7F7F;
+  --neutral-dark: #4C4C4C;
+
+  /* Deep */
+  --neutral-darker: #191919;
+  --neutral-darkest: #000000;
+}
