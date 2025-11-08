@@ -1,6 +1,12 @@
-export default function ArrowRight() {
+import React from 'react';
+
+type Props = React.SVGProps<SVGSVGElement>;
+
+export default function ArrowRight({ className = '', ...rest }: Props) {
   return (
     <svg
+      {...rest}
+      className={`inline-block transition-colors duration-150 text-white/80 hover:text-white/90 rounded-full p-1 ${className}`}
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -9,7 +15,7 @@ export default function ArrowRight() {
     >
       <path
         d="M13.1066 11.9751L8.75334 7.62184C8.58334 7.45184 8.5025 7.25292 8.51084 7.02509C8.51917 6.79726 8.60834 6.59834 8.77834 6.42834C8.94834 6.25834 9.15142 6.17334 9.38759 6.17334C9.62375 6.17334 9.82684 6.25834 9.99684 6.42834L14.9408 11.3723C15.0322 11.4637 15.0985 11.559 15.1398 11.6583C15.1812 11.7575 15.2018 11.8631 15.2018 11.9751C15.2018 12.0871 15.1812 12.1927 15.1398 12.2918C15.0985 12.3912 15.0322 12.4865 14.9408 12.5778L9.97184 17.5468C9.80184 17.7168 9.60292 17.7977 9.37509 17.7893C9.14725 17.781 8.94834 17.6918 8.77834 17.5218C8.60834 17.3518 8.52334 17.1488 8.52334 16.9126C8.52334 16.6764 8.60834 16.4733 8.77834 16.3033L13.1066 11.9751Z"
-        fill="white"
+        fill="currentColor"
       />
     </svg>
   );

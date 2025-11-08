@@ -4,13 +4,13 @@ import Video from "@/app/components/Video";
 
 export const HeroHeaderSection = () => {
   return (
-    <Section className="flex flex-col gap-10 xl:gap-20">
+    <Section className="flex flex-col pt-7 md:pt-14 xl:pt-28 gap-10 xl:gap-20">
       <header className="flex flex-col gap-8 items-center" aria-labelledby="hero-title">
-        <div className="flex flex-col gap-6 items-center">
-          <h1 id="hero-title" className="text-white text-5xl max-w-2xl text-center leading-14">
+        <div className="flex flex-col text-white gap-6 items-center">
+          <h1 id="hero-title" className="text-5xl max-w-2xl text-center leading-14">
             Technology&apos;s edge cuts through the digital noise
           </h1>
-          <p className="text-white max-w-2xl text-center">
+          <p className=" max-w-2xl text-center">
             We track the pulse of innovation with razor-sharp precision. Our reporting strips technology down to its essential truth.
           </p>
         </div>
