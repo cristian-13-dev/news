@@ -1,6 +1,6 @@
 import { sanityFetch } from '@/lib/sanity'
 import { POSTS_QUERY } from '@/lib/queries'
-import { PostCard } from '@/components/ui/PostCard'
+import { PostCard } from '@/app/components/ui/PostCard'
 import type { PostListItem } from '@/types/sanity'
 
 export default async function PostsPage() {

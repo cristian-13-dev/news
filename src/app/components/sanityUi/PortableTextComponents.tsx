@@ -1,6 +1,6 @@
 import { PortableTextComponents } from '@portabletext/react'
 import Image from 'next/image'
-import { urlFor } from '../sanity/lib/image'
+import { urlFor } from '../../../sanity/lib/image'
 
 export const components: PortableTextComponents = {
   block: {

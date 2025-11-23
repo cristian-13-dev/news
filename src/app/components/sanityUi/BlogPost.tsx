@@ -1,5 +1,5 @@
 import { PortableText } from '@portabletext/react'
-import { components } from '@/components/PortableTextComponents'
+import { components } from '@/app/components/PortableTextComponents'
 import type { Post } from '@/types/sanity'
 
 interface BlogPostProps {
