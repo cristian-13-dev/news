@@ -1,6 +1,9 @@
 import { PortableTextComponents } from '@portabletext/react'
 import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
+import { Table } from '@/components/ui/Table'
+import { Video } from '@/components/ui/Video'
+import { Comparison } from '@/components/ui/Comparison'
 
 export const components: PortableTextComponents = {
   block: {
@@ -100,6 +103,15 @@ export const components: PortableTextComponents = {
           )}
         </figure>
       )
+    },
+    table: ({ value }) => {
+      return <Table value={value} />
+    },
+    video: ({ value }) => {
+      return <Video value={value} />
+    },
+    comparison: ({ value }) => {
+      return <Comparison value={value} />
     },
   },
 }
