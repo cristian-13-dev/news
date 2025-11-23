@@ -1,0 +1,30 @@
+// GROQ query fragments
+export const POST_FIELDS = `
+  _id,
+  title,
+  slug,
+  author->{
+    name,
+    image
+  },
+  mainImage,
+  categories[]->{
+    _id,
+    title
+  },
+  publishedAt,
+  body
+`
+
+// Query to fetch all posts
+export const POSTS_QUERY = `*[_type == "post"] | order(publishedAt desc) {
+  ${POST_FIELDS}
+}`
+
+// Query to fetch a single post by slug
+export const POST_BY_SLUG_QUERY = `*[_type == "post" && slug.current == $slug][0] {
+  ${POST_FIELDS}
+}`
+
+// Query to fetch all post slugs (for static generation)
+export const POST_SLUGS_QUERY = `*[_type == "post"]{ "slug": slug.current }`
