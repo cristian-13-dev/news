@@ -1,10 +1,18 @@
-import dynamic from 'next/dynamic'
-import config from '../../../../sanity.config'
+/**
+ * This route is responsible for the built-in authoring environment using Sanity Studio.
+ * All routes under your studio path is handled by this file using Next.js' catch-all routes:
+ * https://nextjs.org/docs/routing/dynamic-routes#catch-all-routes
+ *
+ * You can learn more about the next-sanity package here:
+ * https://github.com/sanity-io/next-sanity
+ */
 
-const NextStudioNoSSR = dynamic(
-  () => import('next-sanity/studio').then(mod => mod.NextStudio),
-);
+import { Studio } from './Studio'
+
+export const dynamic = 'force-dynamic'
+
+export { metadata, viewport } from 'next-sanity/studio'
 
 export default function StudioPage() {
-  return <NextStudioNoSSR  config={config} />
+  return <Studio />
 }
