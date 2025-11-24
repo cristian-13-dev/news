@@ -29,6 +29,7 @@ export default async function PostPage({
   const { data: post } = await sanityFetch({
     query: POST_BY_SLUG_QUERY,
     params: { slug },
+    tags: ['post', `post:${slug}`], // Cache tags for revalidation
   }) as { data: Post | null }
 
   if (!post) {

@@ -9,6 +9,7 @@ export const revalidate = 60
 export default async function PostsPage() {
   const { data: posts } = await sanityFetch({
     query: POSTS_QUERY,
+    tags: ['post'], // Cache tag for revalidation
   }) as { data: PostListItem[] }
 
   return (
