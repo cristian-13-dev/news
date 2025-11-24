@@ -4,6 +4,7 @@ import { urlFor } from '@/lib/sanity'
 import { Table } from '@/components/ui/Table'
 import { Video } from '@/components/ui/Video'
 import { Comparison } from '@/components/ui/Comparison'
+import { ProsCons } from '@/components/ui/ProsCons'
 
 export const components: PortableTextComponents = {
   block: {
@@ -112,6 +113,9 @@ export const components: PortableTextComponents = {
     },
     comparison: ({ value }) => {
       return <Comparison value={value} />
+    },
+    prosCons: ({ value }) => {
+      return <ProsCons value={value} />
     },
   },
 }

@@ -87,5 +87,8 @@ export const blockContentType = defineType({
     defineArrayMember({
       type: 'comparison',
     }),
+    defineArrayMember({
+      type: 'prosCons',
+    }),
   ],
 })

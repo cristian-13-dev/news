@@ -1,7 +1,8 @@
+import React from 'react'
 import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
 
-interface ComparisonDevice {
+interface ComparisonItem {
   name: string
   image?: {
     asset: {
@@ -9,56 +10,28 @@ interface ComparisonDevice {
     }
     alt?: string
   }
-  price?: string
-  specs?: Array<{
-    label: string
+  highlight?: string
+  values?: Array<{
     value: string
   }>
-  pros?: string[]
-  cons?: string[]
-  rating?: number
 }
 
 interface ComparisonProps {
   value: {
     title?: string
-    devices: ComparisonDevice[]
+    criteria: Array<{
+      name: string
+    }>
+    items: ComparisonItem[]
   }
-}
-
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <svg
-          key={star}
-          className={`w-5 h-5 ${
-            star <= rating ? 'text-yellow-400' : 'text-gray-300'
-          }`}
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ))}
-      <span className="ml-2 text-sm font-medium text-gray-700">{rating.toFixed(1)}</span>
-    </div>
-  )
 }
 
 export function Comparison({ value }: ComparisonProps) {
-  const { title, devices } = value
+  const { title, criteria, items } = value
 
-  if (!devices || devices.length < 2) {
+  if (!items || items.length < 2 || !criteria || criteria.length === 0) {
     return null
   }
-
-  // Get all unique spec labels
-  const allSpecLabels = Array.from(
-    new Set(
-      devices.flatMap((device) => device.specs?.map((spec) => spec.label) || [])
-    )
-  )
 
   return (
     <div className="my-8">
@@ -66,114 +39,113 @@ export function Comparison({ value }: ComparisonProps) {
         <h3 className="text-2xl font-bold text-gray-900 mb-6">{title}</h3>
       )}
 
-      <div className="overflow-x-auto">
-        <div className={`grid ${devices.length === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-4 min-w-[640px]`}>
-          {devices.map((device, index) => (
-            <div
-              key={index}
-              className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-            >
-              {/* Device Image */}
-              {device.image && (
-                <div className="relative w-full aspect-square bg-gray-50 p-4">
-                  <Image
-                    src={urlFor(device.image).width(400).height(400).url()}
-                    alt={device.image.alt || device.name}
-                    fill
-                    className="object-contain p-4"
-                  />
+      {/* Desktop/Tablet View: Polished card grid comparison */}
+      <div className="hidden md:block">
+        <div className="w-full">
+          <div
+            className="grid gap-6 items-stretch"
+            style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}
+          >
+            {items.map((item, index) => (
+              <article
+                key={index}
+                className="flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-transform duration-150 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-slate-100"
+              >
+                <div className="p-6 text-center">
+                  {item.image ? (
+                    <div className="relative w-20 h-20 mx-auto mb-3 rounded-full bg-slate-50 overflow-hidden flex items-center justify-center">
+                      <Image
+                        src={urlFor(item.image).width(256).height(256).url()}
+                        alt={item.image.alt || item.name}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-slate-50" />
+                  )}
+
+                  <div className="text-base font-semibold text-slate-900">{item.name}</div>
+                  {item.highlight && (
+                    <div className="mt-2">
+                      <span className="inline-block px-3 py-0.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-full">
+                        {item.highlight}
+                      </span>
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {/* Device Header */}
-              <div className="p-4 border-b border-gray-200 bg-gray-50">
-                <h4 className="text-lg font-bold text-gray-900 mb-2">
-                  {device.name}
-                </h4>
-                {device.price && (
-                  <p className="text-2xl font-bold text-blue-600">
-                    {device.price}
-                  </p>
-                )}
-                {device.rating !== undefined && (
-                  <div className="mt-2">
-                    <StarRating rating={device.rating} />
-                  </div>
-                )}
-              </div>
-
-              {/* Specifications */}
-              {device.specs && device.specs.length > 0 && (
-                <div className="p-4 border-b border-gray-200">
-                  <h5 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
-                    Specifications
-                  </h5>
-                  <dl className="space-y-3">
-                    {allSpecLabels.map((label) => {
-                      const spec = device.specs?.find((s) => s.label === label)
+                <div className="flex-1 p-4 bg-white">
+                  <dl className="grid grid-cols-2 gap-y-3 gap-x-4">
+                    {criteria.map((criterion, criterionIndex) => {
+                      const value = item.values?.[criterionIndex]?.value || '—'
                       return (
-                        <div key={label}>
-                          <dt className="text-xs font-medium text-gray-500 mb-1">
-                            {label}
-                          </dt>
-                          <dd className="text-sm text-gray-900">
-                            {spec?.value || '—'}
-                          </dd>
-                        </div>
+                        <React.Fragment key={criterionIndex}>
+                          <dt className="text-xs text-slate-500">{criterion.name}</dt>
+                          <dd className="text-sm font-medium text-slate-800 text-right">{value}</dd>
+                        </React.Fragment>
                       )
                     })}
                   </dl>
                 </div>
-              )}
-
-              {/* Pros and Cons */}
-              <div className="p-4 space-y-4">
-                {device.pros && device.pros.length > 0 && (
-                  <div>
-                    <h5 className="text-sm font-semibold text-green-700 mb-2 flex items-center gap-1">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      Pros
-                    </h5>
-                    <ul className="space-y-1">
-                      {device.pros.map((pro, idx) => (
-                        <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-                          <span className="text-green-600 mt-0.5">+</span>
-                          <span>{pro}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {device.cons && device.cons.length > 0 && (
-                  <div>
-                    <h5 className="text-sm font-semibold text-red-700 mb-2 flex items-center gap-1">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                      Cons
-                    </h5>
-                    <ul className="space-y-1">
-                      {device.cons.map((con, idx) => (
-                        <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-                          <span className="text-red-600 mt-0.5">−</span>
-                          <span>{con}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+              </article>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Mobile scroll hint */}
+      {/* Mobile View: Stacked cards */}
+      <div className="md:hidden space-y-6">
+        {items.map((item, itemIndex) => (
+          <div
+            key={itemIndex}
+            className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+          >
+            {/* Item Header */}
+            <div className="bg-gray-50 p-4 border-b border-gray-200">
+              {item.image && (
+                <div className="relative w-32 h-32 mx-auto mb-3">
+                  <Image
+                    src={urlFor(item.image).width(256).height(256).url()}
+                    alt={item.image.alt || item.name}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              )}
+              <h4 className="text-lg font-bold text-gray-900 text-center">
+                {item.name}
+              </h4>
+              {item.highlight && (
+                <div className="text-center mt-2">
+                  <span className="inline-block px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">
+                    {item.highlight}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Item Criteria */}
+            <div className="divide-y divide-gray-200">
+              {criteria.map((criterion, criterionIndex) => {
+                const value = item.values?.[criterionIndex]?.value || '—'
+                return (
+                  <div key={criterionIndex} className="p-4">
+                    <dt className="text-sm font-semibold text-gray-700 mb-1">
+                      {criterion.name}
+                    </dt>
+                    <dd className="text-sm text-gray-800">{value}</dd>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Mobile hint */}
       <p className="text-xs text-gray-500 text-center mt-4 md:hidden">
-        ← Swipe to see all devices →
+        Scroll down to see all items
       </p>
     </div>
   )

@@ -6,5 +6,5 @@ export const client = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn: true, 
+  useCdn: false, // Disable CDN to get fresh content
 })

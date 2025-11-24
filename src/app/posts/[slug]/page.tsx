@@ -10,6 +10,9 @@ import { AuthorInfo } from '@/app/components/ui/AuthorInfo'
 import { PostImage } from '@/app/components/ui/PostImage'
 import type { Post } from '@/types/sanity'
 
+// Revalidate every 60 seconds (ISR)
+export const revalidate = 60
+
 // Generate static params for all posts
 export async function generateStaticParams() {
   const posts = await client.fetch<Array<{ slug: string }>>(POST_SLUGS_QUERY)

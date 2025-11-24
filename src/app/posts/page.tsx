@@ -3,6 +3,9 @@ import { POSTS_QUERY } from '@/lib/queries'
 import { PostCard } from '@/app/components/ui/PostCard'
 import type { PostListItem } from '@/types/sanity'
 
+// Revalidate every 60 seconds (ISR)
+export const revalidate = 60
+
 export default async function PostsPage() {
   const { data: posts } = await sanityFetch({
     query: POSTS_QUERY,

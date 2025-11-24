@@ -7,7 +7,8 @@ import {authorType} from './authorType'
 import {tableType} from './tableType'
 import {videoType} from './videoType'
 import {comparisonType} from './comparisonType'
+import {prosConsType} from './prosConsType'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [blockContentType, categoryType, postType, authorType, tableType, videoType, comparisonType],
+  types: [blockContentType, categoryType, postType, authorType, tableType, videoType, comparisonType, prosConsType],
 }

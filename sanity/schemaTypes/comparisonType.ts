@@ -3,7 +3,7 @@ import { ComposeIcon } from '@sanity/icons'
 
 export const comparisonType = defineType({
   name: 'comparison',
-  title: 'Device Comparison',
+  title: 'Comparison Table',
   type: 'object',
   icon: ComposeIcon,
   fields: [
@@ -11,104 +11,104 @@ export const comparisonType = defineType({
       name: 'title',
       title: 'Comparison Title',
       type: 'string',
-      description: 'e.g., "Flagship Smartphone Comparison 2025"',
+      description: 'e.g., "Best Smartphones 2025", "Electric Cars Comparison"',
     },
     {
-      name: 'devices',
-      title: 'Devices',
+      name: 'criteria',
+      title: 'Comparison Criteria',
       type: 'array',
-      validation: (Rule) => Rule.min(2).max(3),
+      description: 'Define the criteria once (e.g., Display, Processor, Price, etc.)',
+      validation: (Rule) => Rule.required().min(1),
       of: [
         {
           type: 'object',
-          name: 'device',
+          name: 'criterion',
           fields: [
             {
               name: 'name',
-              title: 'Device Name',
+              title: 'Criterion Name',
               type: 'string',
+              description: 'e.g., Display, Engine, Model, etc.',
+              validation: (Rule) => Rule.required(),
+            },
+          ],
+          preview: {
+            select: {
+              name: 'name',
+            },
+            prepare({ name }) {
+              return {
+                title: name,
+              }
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'items',
+      title: 'Items to Compare',
+      type: 'array',
+      description: 'Add 2-4 items to compare',
+      validation: (Rule) => Rule.min(2).max(4),
+      of: [
+        {
+          type: 'object',
+          name: 'item',
+          fields: [
+            {
+              name: 'name',
+              title: 'Item Name',
+              type: 'string',
+              description: 'Name of the product/item',
               validation: (Rule) => Rule.required(),
             },
             {
               name: 'image',
-              title: 'Device Image',
+              title: 'Image',
               type: 'image',
               options: {
                 hotspot: true,
               },
             },
             {
-              name: 'price',
-              title: 'Price',
+              name: 'highlight',
+              title: 'Highlight Label',
               type: 'string',
-              description: 'e.g., "$999" or "€899"',
+              description: 'Optional badge (e.g., "Best Value", "Editor\'s Choice")',
             },
             {
-              name: 'specs',
-              title: 'Specifications',
+              name: 'values',
+              title: 'Criterion Values',
               type: 'array',
+              description: 'Fill in values for each criterion in the same order',
               of: [
                 {
                   type: 'object',
-                  name: 'spec',
+                  name: 'value',
                   fields: [
-                    {
-                      name: 'label',
-                      title: 'Label',
-                      type: 'string',
-                      description: 'e.g., "Display", "Processor", "Camera"',
-                    },
                     {
                       name: 'value',
                       title: 'Value',
                       type: 'text',
                       rows: 2,
+                      validation: (Rule) => Rule.required(),
                     },
                   ],
-                  preview: {
-                    select: {
-                      label: 'label',
-                      value: 'value',
-                    },
-                    prepare({ label, value }) {
-                      return {
-                        title: label,
-                        subtitle: value,
-                      }
-                    },
-                  },
                 },
               ],
-            },
-            {
-              name: 'pros',
-              title: 'Pros',
-              type: 'array',
-              of: [{ type: 'string' }],
-            },
-            {
-              name: 'cons',
-              title: 'Cons',
-              type: 'array',
-              of: [{ type: 'string' }],
-            },
-            {
-              name: 'rating',
-              title: 'Rating (out of 5)',
-              type: 'number',
-              validation: (Rule) => Rule.min(0).max(5).precision(1),
             },
           ],
           preview: {
             select: {
               name: 'name',
-              price: 'price',
+              highlight: 'highlight',
               image: 'image',
             },
-            prepare({ name, price, image }) {
+            prepare({ name, highlight, image }) {
               return {
                 title: name,
-                subtitle: price,
+                subtitle: highlight,
                 media: image,
               }
             },
@@ -120,13 +120,13 @@ export const comparisonType = defineType({
   preview: {
     select: {
       title: 'title',
-      devices: 'devices',
+      items: 'items',
     },
-    prepare({ title, devices }) {
-      const deviceCount = devices?.length || 0
+    prepare({ title, items }) {
+      const itemCount = items?.length || 0
       return {
-        title: title || 'Device Comparison',
-        subtitle: `${deviceCount} devices`,
+        title: title || 'Comparison Table',
+        subtitle: `${itemCount} items`,
       }
     },
   },
