@@ -92,7 +92,7 @@ export const blockContentType = defineType({
       type: 'prosCons',
     }),
     defineArrayMember({
-      type: 'barChart',
+      type: 'chart',
       components: {
         preview: (props) => {
           return React.createElement(BarChartRenderer, props)

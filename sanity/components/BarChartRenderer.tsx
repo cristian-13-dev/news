@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from 'react'
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, LabelList } from 'recharts'
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, LabelList, LineChart, Line, AreaChart, Area, PieChart, Pie, Legend } from 'recharts'
 
 const PALETTES: Record<string, string[]> = {
   default: ['#4F46E5', '#06B6D4', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6'],
@@ -92,37 +92,108 @@ export default function BarChartRenderer({value}: {value: any}) {
 
   function SingleChart({data, isHorizontal, chartTitle}: {data: any[], isHorizontal: boolean, chartTitle?: string}) {
     const layout = isHorizontal ? 'vertical' : 'horizontal'
-    return (
-      <div style={{ position: 'relative', width: '100%', paddingTop }}>
-        {renderLegend(data)}
-        <div style={{ position: 'absolute', inset: 0 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} layout={layout} margin={{ top: 4, right: 12, left: 12, bottom: 44 }} barCategoryGap={'30%'} barGap={8}>
-              {isHorizontal ? (
-                <>
-                  <XAxis type="number" />
-                  <YAxis dataKey="label" type="category" width={100} />
-                </>
-              ) : (
-                <>
-                  <XAxis dataKey="label" type="category" />
-                  <YAxis />
-                </>
-              )}
-              <Tooltip />
-              {grid?.show && <CartesianGrid stroke={gridColor} strokeWidth={gridStroke} opacity={gridOpacity} />}
-              <Bar dataKey="value" radius={isHorizontal ? [0, 8, 8, 0] : [8, 8, 0, 0]}>
-                {data.map((entry, i) => (
-                  <Cell key={i} fill={entry.color || colors[i % colors.length]} />
-                ))}
-                <LabelList dataKey="value" content={renderValueLabel} />
-              </Bar>
-              {chartTitle ? <text x="50%" y="99%" textAnchor="middle" fill="#374151" fontWeight={700} fontSize={12}>{chartTitle}</text> : null}
-            </BarChart>
-          </ResponsiveContainer>
+
+    // Determine chartType from outer value
+    const chartType = (value && (value.chartType || 'pie'))
+
+    if (chartType === 'bar') {
+      return (
+        <div style={{ position: 'relative', width: '100%', paddingTop }}>
+          {renderLegend(data)}
+          <div style={{ position: 'absolute', inset: 0 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data} layout={layout} margin={{ top: 4, right: 12, left: 12, bottom: 44 }} barCategoryGap={'30%'} barGap={8}>
+                {isHorizontal ? (
+                  <>
+                    <XAxis type="number" />
+                    <YAxis dataKey="label" type="category" width={100} />
+                  </>
+                ) : (
+                  <>
+                    <XAxis dataKey="label" type="category" />
+                    <YAxis />
+                  </>
+                )}
+                <Tooltip />
+                {grid?.show && <CartesianGrid stroke={gridColor} strokeWidth={gridStroke} opacity={gridOpacity} />}
+                <Bar dataKey="value" radius={isHorizontal ? [0, 8, 8, 0] : [8, 8, 0, 0]}>
+                  {data.map((entry, i) => (
+                    <Cell key={i} fill={entry.color || colors[i % colors.length]} />
+                  ))}
+                  <LabelList dataKey="value" content={renderValueLabel} />
+                </Bar>
+                {chartTitle ? <text x="50%" y="99%" textAnchor="middle" fill="#374151" fontWeight={700} fontSize={12}>{chartTitle}</text> : null}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-      </div>
-    )
+      )
+    }
+
+    // LINE / AREA: expect value.series to exist
+    if (chartType === 'line' || chartType === 'area') {
+      const series = (value && value.series) || []
+      const allLabels = Array.from(new Set(series.flatMap((s: any) => (s.values || []).map((v: any) => v.label))))
+      const chartData = allLabels.map((label) => {
+        const item: any = { label }
+        series.forEach((s: any, si: number) => {
+          const found = (s.values || []).find((v: any) => v.label === label)
+          item[`s${si}`] = found ? found.value : 0
+        })
+        return item
+      })
+
+      return (
+        <div style={{ position: 'relative', width: '100%', paddingTop }}>
+          <div style={{ position: 'absolute', inset: 0 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              {chartType === 'line' ? (
+                <LineChart data={chartData} margin={{ top: 4, right: 12, left: 12, bottom: 24 }}>
+                  <XAxis dataKey="label" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  {series.map((s: any, i: number) => (
+                    <Line key={i} type="monotone" dataKey={`s${i}`} stroke={s.color || colors[i % colors.length]} dot={false} />
+                  ))}
+                </LineChart>
+              ) : (
+                <AreaChart data={chartData} margin={{ top: 4, right: 12, left: 12, bottom: 24 }}>
+                  <XAxis dataKey="label" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  {series.map((s: any, i: number) => (
+                    <Area key={i} type="monotone" dataKey={`s${i}`} stroke={s.color || colors[i % colors.length]} fill={s.color || colors[i % colors.length]} />
+                  ))}
+                </AreaChart>
+              )}
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )
+    }
+
+    // PIE / DONUT: expect value.slices or data
+    if (chartType === 'pie' || chartType === 'donut') {
+      const pieData = (value && value.slices) || data
+      const isDonut = chartType === 'donut' || Boolean((value && value.isDonut))
+      return (
+        <div style={{ position: 'relative', width: '100%', paddingTop }}>
+          <div style={{ position: 'absolute', inset: 0 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Tooltip />
+                <Pie data={pieData as any} dataKey="value" nameKey="label" cx="50%" cy="50%" outerRadius={80} innerRadius={isDonut ? 40 : 0} label>
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )
+    }
+
+    return null
   }
 
   // If groups provided, render one Recharts chart per group (keeps grouping clear)

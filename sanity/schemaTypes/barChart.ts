@@ -1,10 +1,25 @@
 import {defineType, defineField, defineArrayMember} from 'sanity'
 
-export const barChart = defineType({
-  name: 'barChart',
-  title: 'Bar Chart',
+export const chart = defineType({
+  name: 'chart',
+  title: 'Chart',
   type: 'object',
   fields: [
+    defineField({
+      name: 'chartType',
+      title: 'Chart Type',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Bar', value: 'bar' },
+          { title: 'Line', value: 'line' },
+          { title: 'Area', value: 'area' },
+          { title: 'Pie / Donut', value: 'pie' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'pie',
+    }),
     defineField({
       name: 'title',
       title: 'Title',
@@ -22,20 +37,7 @@ export const barChart = defineType({
         layout: 'radio',
       },
       initialValue: 'vertical',
-    }),
-    defineField({
-      name: 'palette',
-      title: 'Color Palette',
-      type: 'string',
-      options: {
-        list: [
-          {title: 'Default', value: 'default'},
-          {title: 'Pastel', value: 'pastel'},
-          {title: 'Vibrant', value: 'vibrant'},
-          {title: 'Monochrome', value: 'mono'},
-        ],
-      },
-      initialValue: 'default',
+      hidden: ({parent}) => parent?.chartType === 'pie',
     }),
     defineField({
       name: 'aspectRatio',
@@ -51,28 +53,63 @@ export const barChart = defineType({
       },
       initialValue: '16:10',
     }),
+    // Series for multi-line / multi-area charts
     defineField({
-      name: 'groupGap',
-      title: 'Group gap (px)',
-      type: 'number',
-      description: 'Gap between bars inside a group (px). Smaller values make grouped bars denser.',
-      initialValue: 6,
-    }),
-    defineField({
-      name: 'grid',
-      title: 'Grid',
-      type: 'object',
-      fields: [
-        { name: 'show', title: 'Show grid', type: 'boolean', initialValue: false },
-        { name: 'color', title: 'Grid color', type: 'string', initialValue: '#E5E7EB' },
-        { name: 'strokeWidth', title: 'Stroke width', type: 'number', initialValue: 1 },
-        { name: 'opacity', title: 'Opacity', type: 'number', initialValue: 0.6 },
-        { name: 'spacing', title: 'Grid spacing (px)', type: 'number', description: 'Distance between grid lines in pixels', initialValue: 48 },
+      name: 'series',
+      title: 'Series (for Line / Area)',
+      hidden: ({parent}) => !(parent?.chartType === 'line' || parent?.chartType === 'area'),
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          fields: [
+            { name: 'label', title: 'Series label', type: 'string' },
+            { name: 'color', title: 'Color', type: 'string' },
+            {
+              name: 'values',
+              title: 'Values',
+              type: 'array',
+              of: [
+                defineArrayMember({
+                  type: 'object',
+                  fields: [
+                    { name: 'label', title: 'Label', type: 'string' },
+                    { name: 'value', title: 'Value', type: 'number' },
+                  ],
+                }),
+              ],
+            },
+          ],
+        }),
       ],
     }),
+
+    // Slices for Pie/Donut charts
+    defineField({
+      name: 'slices',
+      title: 'Slices (for Pie / Donut)',
+      hidden: ({parent}) => parent?.chartType !== 'pie',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          fields: [
+            { name: 'label', title: 'Label', type: 'string' },
+            { name: 'value', title: 'Value', type: 'number' },
+            { name: 'color', title: 'Color', type: 'string' },
+          ],
+        }),
+      ],
+    }),
+
+    // Simple toggles to switch between Pie and Donut presentation (merged)
+    defineField({ name: 'isPie', title: 'Show as Pie', type: 'boolean', initialValue: false, hidden: ({parent}) => parent?.chartType !== 'pie' }),
+    defineField({ name: 'isDonut', title: 'Show as Donut', type: 'boolean', initialValue: true, hidden: ({parent}) => parent?.chartType !== 'pie' }),
+    
     defineField({
       name: 'bars',
       title: 'Bars',
+      hidden: ({parent}) => parent?.chartType !== 'bar',
       type: 'array',
       of: [
         defineArrayMember({
@@ -88,6 +125,7 @@ export const barChart = defineType({
     defineField({
       name: 'groups',
       title: 'Groups',
+      hidden: ({parent}) => parent?.chartType !== 'bar',
       type: 'array',
       description: 'Optional grouping of bars. If provided, groups will be rendered instead of the top-level `bars` list.',
       of: [
@@ -121,10 +159,12 @@ export const barChart = defineType({
       bars: 'bars',
       groups: 'groups',
       direction: 'direction',
-      palette: 'palette',
+      chartType: 'chartType',
+      isDonut: 'isDonut',
     },
     prepare(selection) {
-      const {title, bars, groups, direction, palette} = selection
+      const {title, bars, groups, direction, chartType, isDonut} = selection as any
+      const ct = chartType || 'pie'
       let count = 0
       if (groups) {
         count = groups.reduce((acc: number, g: any) => acc + (g?.bars?.length || 0), 0)
@@ -132,8 +172,8 @@ export const barChart = defineType({
         count = bars.length
       }
       return {
-        title: title || 'Bar Chart',
-        subtitle: `${count} bars · ${direction || 'vertical'} · ${palette || 'default'}`,
+        title: title || 'Chart',
+        subtitle: `${count} items · ${direction || 'vertical'} · ${ct}${isDonut ? ' · donut' : ''}`,
       }
     },
   },

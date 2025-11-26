@@ -1,7 +1,6 @@
 import { defineType, defineArrayMember } from "sanity";
 import { ImageIcon, BlockquoteIcon } from "@sanity/icons";
-import { BlockquoteRenderer } from "../components/BlockquoteRenderer";
-import { barChart } from "./schemaTypes/barChart";
+import { chart } from "./schemaTypes/barChart";
 
 export const blockContentType = defineType({
   title: "Block Content",
@@ -21,7 +20,6 @@ export const blockContentType = defineType({
           title: "Quote",
           value: "blockquote",
           icon: BlockquoteIcon,
-          component: BlockquoteRenderer,
         },
       ],
       lists: [{ title: "Bullet", value: "bullet" }],
@@ -74,9 +72,9 @@ export const blockContentType = defineType({
       type: "prosCons",
     }),
     defineArrayMember({
-      type: "barChart",
+      type: "chart",
     }),
   ],
 });
 
-export const schemaTypes = [blockContentType, barChart];
+export const schemaTypes = [blockContentType, chart];

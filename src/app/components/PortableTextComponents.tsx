@@ -118,7 +118,7 @@ export const components: PortableTextComponents = {
     prosCons: ({ value }) => {
       return <ProsCons value={value} />
     },
-    barChart: ({ value }) => {
+    chart: ({ value }) => {
       if (!value) return null;
       return <BarChartComponent value={value} />;
     },

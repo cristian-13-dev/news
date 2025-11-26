@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from 'react'
-import { BarChart as ReBarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, LabelList } from 'recharts'
+import { BarChart as ReBarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, LabelList, LineChart, Line, AreaChart, Area, PieChart, Pie, Legend } from 'recharts'
 
 const PALETTES: Record<string, string[]> = {
   default: ['#4F46E5', '#06B6D4', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6'],
@@ -25,6 +25,13 @@ export interface BarChartValue {
   title?: string
   bars?: BarChartData[]
   groups?: BarGroup[]
+  chartType?: 'bar' | 'line' | 'area' | 'pie' | 'donut'
+  series?: Array<{
+    label?: string
+    color?: string
+    values?: BarChartData[]
+  }>
+  slices?: BarChartData[]
   direction?: 'vertical' | 'horizontal'
   palette?: string
   aspectRatio?: string
@@ -46,6 +53,9 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
   const {
     title,
     bars = [],
+    chartType = 'pie',
+    series = [],
+    slices = [],
     groups = [],
     direction = 'vertical',
     palette = 'default',
@@ -110,50 +120,115 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
   function SingleChart({ data, isHorizontal, chartTitle }: { data: BarChartData[]; isHorizontal: boolean; chartTitle?: string }) {
     const layout = isHorizontal ? 'vertical' : 'horizontal'
 
-    return (
-      <>
+    // BAR chart
+    if (chartType === 'bar') {
+      return (
+        <>
+          <div style={{ position: 'relative', width: '100%', paddingTop }}>
+            <div style={{ position: 'absolute', inset: 0 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <ReBarChart data={data} layout={layout} margin={{ top: 4, right: 12, left: 12, bottom: 24 }} barCategoryGap={'30%'} barGap={8}>
+                  {isHorizontal ? (
+                    <>
+                      <XAxis type="number" />
+                      <YAxis dataKey="label" type="category" width={80} />
+                    </>
+                  ) : (
+                    <>
+                      <XAxis dataKey="label" type="category" />
+                      <YAxis hide />
+                    </>
+                  )}
+                  <Tooltip />
+                  {gridEnabled && (
+                    <CartesianGrid stroke={grid?.color || '#E5E7EB'} strokeWidth={grid?.strokeWidth || 1} opacity={grid?.opacity ?? 0.6} />
+                  )}
+                  <Bar dataKey="value" radius={isHorizontal ? [0, 8, 8, 0] : [8, 8, 0, 0]}>
+                    {data.map((entry, i) => (
+                      <Cell key={i} fill={entry.color || colors[i % colors.length]} />
+                    ))}
+                    <LabelList dataKey="value" content={renderValueLabel} />
+                  </Bar>
+                  {chartTitle ? <text x="50%" y="99%" textAnchor="middle" fill="#374151" fontWeight={700} fontSize={12}>{chartTitle}</text> : null}
+                </ReBarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          {isMobile && data && data.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, padding: 10, marginTop: 8, background: '#ffffff', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', border: '1px solid #E5E7EB' }}>
+              {data.map((d, i) => (
+                <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: '#374151', minWidth: 0 }}>
+                  <div style={{ width: 12, height: 12, background: d.color || colors[i % colors.length], borderRadius: 3, flex: '0 0 auto' }} />
+                  <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.label}</div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </>
+      )
+    }
+
+    // LINE / AREA charts — expect `series` array
+    if (chartType === 'line' || chartType === 'area') {
+      // build unified data by label
+      const allLabels = Array.from(new Set(series.flatMap((s) => (s.values || []).map((v) => v.label))))
+      const chartData = allLabels.map((label) => {
+        const item: any = { label }
+        series.forEach((s, si) => {
+          const found = (s.values || []).find((v) => v.label === label)
+          item[`s${si}`] = found ? found.value : 0
+        })
+        return item
+      })
+
+      return (
         <div style={{ position: 'relative', width: '100%', paddingTop }}>
           <div style={{ position: 'absolute', inset: 0 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <ReBarChart data={data} layout={layout} margin={{ top: 4, right: 12, left: 12, bottom: 24 }} barCategoryGap={'30%'} barGap={8}>
-              {isHorizontal ? (
-                <>
-                  <XAxis type="number" />
-                  <YAxis dataKey="label" type="category" width={80} />
-                </>
+            <ResponsiveContainer width="100%" height="100%">
+              {chartType === 'line' ? (
+                <LineChart data={chartData} margin={{ top: 4, right: 12, left: 12, bottom: 24 }}>
+                  <XAxis dataKey="label" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  {series.map((s, i) => (
+                    <Line key={i} type="monotone" dataKey={`s${i}`} stroke={s.color || colors[i % colors.length]} dot={false} />
+                  ))}
+                </LineChart>
               ) : (
-                <>
-                  <XAxis dataKey="label" type="category" />
-                  <YAxis hide/>
-                </>
+                <AreaChart data={chartData} margin={{ top: 4, right: 12, left: 12, bottom: 24 }}>
+                  <XAxis dataKey="label" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  {series.map((s, i) => (
+                    <Area key={i} type="monotone" dataKey={`s${i}`} stroke={s.color || colors[i % colors.length]} fill={s.color || colors[i % colors.length]} />
+                  ))}
+                </AreaChart>
               )}
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )
+    }
+
+    // PIE / DONUT charts — expect `slices` array
+    if (chartType === 'pie' || chartType === 'donut') {
+      const pieData = slices || data
+      const isDonut = chartType === 'donut' || (value as any)?.isDonut
+      return (
+        <div style={{ width: '100%', height: 260 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
               <Tooltip />
-              {gridEnabled && (
-                <CartesianGrid stroke={grid?.color || '#E5E7EB'} strokeWidth={grid?.strokeWidth || 1} opacity={grid?.opacity ?? 0.6} />
-              )}
-              <Bar dataKey="value" radius={isHorizontal ? [0, 8, 8, 0] : [8, 8, 0, 0]}>
-                {data.map((entry, i) => (
-                  <Cell key={i} fill={entry.color || colors[i % colors.length]} />
-                ))}
-                <LabelList dataKey="value" content={renderValueLabel} />
-              </Bar>
-              {chartTitle ? <text x="50%" y="99%" textAnchor="middle" fill="#374151" fontWeight={700} fontSize={12}>{chartTitle}</text> : null}
-            </ReBarChart>
+              <Pie data={pieData as any} dataKey="value" nameKey="label" cx="50%" cy="50%" outerRadius={80} innerRadius={isDonut ? 40 : 0} label />
+            </PieChart>
           </ResponsiveContainer>
         </div>
-        </div>
-        {isMobile && data && data.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, padding: 10, marginTop: 8, background: '#ffffff', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', border: '1px solid #E5E7EB' }}>
-            {data.map((d, i) => (
-              <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: '#374151', minWidth: 0 }}>
-                <div style={{ width: 12, height: 12, background: d.color || colors[i % colors.length], borderRadius: 3, flex: '0 0 auto' }} />
-                <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.label}</div>
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </>
-    )
+      )
+    }
+
+    return null
   }
 
   if (hasGroups) {
