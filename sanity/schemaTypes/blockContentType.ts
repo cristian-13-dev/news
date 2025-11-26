@@ -1,7 +1,6 @@
 import {defineType, defineArrayMember} from 'sanity'
 import {ImageIcon, BlockquoteIcon} from '@sanity/icons'
-import {BlockquoteRenderer} from '../components/BlockquoteRenderer'
-import BarChartRenderer from '../components/BarChartRenderer'
+import {BlockquoteRenderer, BarChartRenderer} from '../components'
 import React from 'react'
 
 /**

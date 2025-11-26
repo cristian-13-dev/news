@@ -58,6 +58,17 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
   const hasGroups = Array.isArray(groups) && groups.length > 0
   const gridEnabled = !!grid?.show
 
+  const [isMobile, setIsMobile] = React.useState(false)
+
+  React.useEffect(() => {
+    function check() {
+      setIsMobile(typeof window !== 'undefined' ? window.innerWidth <= 640 : false)
+    }
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   const ratioParts = (aspectRatio || '16:10').split(':')
   const ratio = ratioParts.length === 2 ? Number(ratioParts[1]) / Number(ratioParts[0]) : 0.625
   const paddingTop = `${(ratio * 100).toFixed(2)}%`
@@ -100,11 +111,11 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
     const layout = isHorizontal ? 'vertical' : 'horizontal'
 
     return (
-      <div style={{ position: 'relative', width: '100%', paddingTop }}>
-        {renderLegend(data)}
-        <div style={{ position: 'absolute', inset: 0 }}>
+      <>
+        <div style={{ position: 'relative', width: '100%', paddingTop }}>
+          <div style={{ position: 'absolute', inset: 0 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <ReBarChart data={data} layout={layout} margin={{ top: 4, right: 12, left: 12, bottom: 44 }} barCategoryGap={'30%'} barGap={8}>
+            <ReBarChart data={data} layout={layout} margin={{ top: 4, right: 12, left: 12, bottom: 24 }} barCategoryGap={'30%'} barGap={8}>
               {isHorizontal ? (
                 <>
                   <XAxis type="number" />
@@ -113,7 +124,7 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
               ) : (
                 <>
                   <XAxis dataKey="label" type="category" />
-                  <YAxis />
+                  <YAxis hide/>
                 </>
               )}
               <Tooltip />
@@ -130,12 +141,22 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
             </ReBarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+        </div>
+        {isMobile && data && data.length > 0 ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, padding: 10, marginTop: 8, background: '#ffffff', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', border: '1px solid #E5E7EB' }}>
+            {data.map((d, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: '#374151', minWidth: 0 }}>
+                <div style={{ width: 12, height: 12, background: d.color || colors[i % colors.length], borderRadius: 3, flex: '0 0 auto' }} />
+                <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.label}</div>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </>
     )
   }
 
   if (hasGroups) {
-    const overallMax = Math.max(...groups.flatMap((g) => (g.bars || []).map((b) => b.value)), 0) || 1
     return (
       <div style={{ width: '100%' }}>
         <div style={{ width: '100%', marginTop: 8 }}>
@@ -143,7 +164,7 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
             {groups.map((g, gi) => {
               const data = (g.bars || []).map((b) => ({ label: b.label, value: b.value, color: b.color }))
               return (
-                <div key={gi} style={{ border: '1px solid #E5E7EB', padding: 8, borderRadius: 8 }}>
+                <div key={gi} style={{ padding: 8, borderRadius: 8 }}>
                   <SingleChart data={data} isHorizontal={direction === 'horizontal'} />
                   {g.label && <div style={{ textAlign: 'center', fontWeight: 600, marginTop: 8 }}>{g.label}</div>}
                 </div>
@@ -159,7 +180,7 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
   const data = (bars || []).map((b) => ({ label: b.label, value: b.value, color: b.color }))
   return (
     <div style={{ width: '100%' }}>
-      <div style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: 8, marginTop: 8 }}>
+      <div style={{ borderRadius: 8, padding: 8, marginTop: 8 }}>
         <SingleChart data={data} isHorizontal={direction === 'horizontal'} chartTitle={title} />
       </div>
     </div>
