@@ -25,7 +25,7 @@ export interface BarChartValue {
   title?: string
   bars?: BarChartData[]
   groups?: BarGroup[]
-  chartType?: 'bar' | 'line' | 'area' | 'pie' | 'donut'
+  chartType?: 'bar' | 'line' | 'area' | 'pie' | 'donut' | 'lineArea'
   series?: Array<{
     label?: string
     color?: string
@@ -43,6 +43,7 @@ export interface BarChartValue {
     spacing?: number
     opacity?: number
   }
+  lineAreaType?: 'line' | 'area';
 }
 
 export interface BarChartProps {
@@ -168,7 +169,7 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
     }
 
     // LINE / AREA charts — expect `series` array
-    if (chartType === 'line' || chartType === 'area') {
+    if (chartType === 'line' || chartType === 'area' || chartType === 'lineArea') {
       // build unified data by label
       const allLabels = Array.from(new Set(series.flatMap((s) => (s.values || []).map((v) => v.label))))
       const chartData = allLabels.map((label) => {
@@ -184,7 +185,7 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
         <div style={{ position: 'relative', width: '100%', paddingTop }}>
           <div style={{ position: 'absolute', inset: 0 }}>
             <ResponsiveContainer width="100%" height="100%">
-              {chartType === 'line' ? (
+              {chartType === 'line' || value.lineAreaType === 'line' ? (
                 <LineChart data={chartData} margin={{ top: 4, right: 12, left: 12, bottom: 24 }}>
                   <XAxis dataKey="label" />
                   <YAxis />
@@ -214,7 +215,7 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
     // PIE / DONUT charts — expect `slices` array
     if (chartType === 'pie' || chartType === 'donut') {
       const pieData = slices || data
-      const isDonut = chartType === 'donut' || (value as any)?.presentation === 'donut' || (value as any)?.isDonut
+      const isDonut = chartType === 'donut' || (value as any)?.presentation === 'donut'
       return (
         <div style={{ width: '100%', height: 260 }}>
           <ResponsiveContainer width="100%" height="100%">

@@ -12,98 +12,26 @@ export const chart = defineType({
       options: {
         list: [
           { title: 'Bar', value: 'bar' },
-          { title: 'Line', value: 'line' },
-          { title: 'Area', value: 'area' },
-          { title: 'Pie / Donut', value: 'pie' },
+          { title: 'Pie/Donut', value: 'pieDonut' },
+          { title: 'Line/Area', value: 'lineArea' },
         ],
         layout: 'radio',
       },
       initialValue: 'bar',
     }),
     defineField({
-      name: 'title',
-      title: 'Title',
-      type: 'string',
-    }),
-    defineField({
-      name: 'direction',
-      title: 'Direction',
+      name: 'lineAreaType',
+      title: 'Line/Area Type',
       type: 'string',
       options: {
         list: [
-          {title: 'Vertical', value: 'vertical'},
-          {title: 'Horizontal', value: 'horizontal'},
+          { title: 'Line', value: 'line' },
+          { title: 'Area', value: 'area' },
         ],
         layout: 'radio',
       },
-      initialValue: 'vertical',
-      hidden: ({parent}) => parent?.chartType === 'pie',
+      hidden: ({parent}) => parent?.chartType !== 'lineArea',
     }),
-    defineField({
-      name: 'aspectRatio',
-      title: 'Aspect Ratio',
-      type: 'string',
-      options: {
-        list: [
-          {title: '16:10', value: '16:10'},
-          {title: '16:9', value: '16:9'},
-          {title: '4:3', value: '4:3'},
-          {title: '1:1', value: '1:1'},
-        ],
-      },
-      initialValue: '16:10',
-    }),
-    // Series for multi-line / multi-area charts
-    defineField({
-      name: 'series',
-      title: 'Series (for Line / Area)',
-      hidden: ({parent}) => !(parent?.chartType === 'line' || parent?.chartType === 'area'),
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'object',
-          fields: [
-            { name: 'label', title: 'Series label', type: 'string' },
-            { name: 'color', title: 'Color', type: 'string' },
-            {
-              name: 'values',
-              title: 'Values',
-              type: 'array',
-              of: [
-                defineArrayMember({
-                  type: 'object',
-                  fields: [
-                    { name: 'label', title: 'Label', type: 'string' },
-                    { name: 'value', title: 'Value', type: 'number' },
-                  ],
-                }),
-              ],
-            },
-          ],
-        }),
-      ],
-    }),
-
-    // Slices for Pie/Donut charts
-    defineField({
-      name: 'slices',
-      title: 'Slices (for Pie / Donut)',
-      hidden: ({parent}) => parent?.chartType !== 'pie',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'object',
-          fields: [
-            { name: 'label', title: 'Label', type: 'string' },
-            { name: 'value', title: 'Value', type: 'number' },
-            { name: 'color', title: 'Color', type: 'string' },
-          ],
-        }),
-      ],
-    }),
-
-    // Simple toggles to switch between Pie and Donut presentation (merged)
-    // Presentation selector: use a single radio for Pie vs Donut (keep legacy fields for compatibility)
     defineField({
       name: 'presentation',
       title: 'Presentation',
@@ -115,13 +43,8 @@ export const chart = defineType({
         ],
         layout: 'radio',
       },
-      initialValue: 'pie',
-      hidden: ({parent}) => parent?.chartType !== 'pie',
+      hidden: ({parent}) => parent?.chartType !== 'pieDonut',
     }),
-    // Legacy boolean toggles (kept for old documents) - can be removed after migration
-    defineField({ name: 'isPie', title: 'Show as Pie', type: 'boolean', initialValue: false, hidden: ({parent}) => parent?.chartType !== 'pie' }),
-    defineField({ name: 'isDonut', title: 'Show as Donut', type: 'boolean', initialValue: true, hidden: ({parent}) => parent?.chartType !== 'pie' }),
-    
     defineField({
       name: 'bars',
       title: 'Bars',
@@ -137,6 +60,25 @@ export const chart = defineType({
           ],
         }),
       ],
+    }),
+    defineField({
+      name: 'title',
+      title: 'Chart Title',
+      type: 'string',
+      description: 'The title of the chart displayed at the top.',
+    }),
+    defineField({
+      name: 'direction',
+      title: 'Direction',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Vertical', value: 'vertical' },
+          { title: 'Horizontal', value: 'horizontal' },
+        ],
+        layout: 'radio',
+      },
+      hidden: ({parent}) => parent?.chartType === 'pieDonut' || parent?.chartType === 'lineArea',
     }),
     defineField({
       name: 'groups',
@@ -168,6 +110,53 @@ export const chart = defineType({
         }),
       ],
     }),
+    defineField({
+      name: 'series',
+      title: 'Series',
+      type: 'array',
+      hidden: ({parent}) => parent?.chartType !== 'lineArea',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          fields: [
+            { name: 'label', title: 'Label', type: 'string' },
+            { name: 'color', title: 'Color', type: 'string' },
+            {
+              name: 'values',
+              title: 'Values',
+              type: 'array',
+              of: [
+                defineArrayMember({
+                  type: 'object',
+                  fields: [
+                    { name: 'label', title: 'Label', type: 'string' },
+                    { name: 'value', title: 'Value', type: 'number' },
+                  ],
+                }),
+              ],
+            },
+          ],
+        }),
+      ],
+    }),
+
+    // Slices for Pie/Donut charts
+    defineField({
+      name: 'slices',
+      title: 'Slices (for Pie / Donut)',
+      hidden: ({parent}) => parent?.chartType !== 'pieDonut',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          fields: [
+            { name: 'label', title: 'Label', type: 'string' },
+            { name: 'value', title: 'Value', type: 'number' },
+            { name: 'color', title: 'Color', type: 'string' },
+          ],
+        }),
+      ],
+    }),
   ],
   preview: {
     select: {
@@ -177,13 +166,11 @@ export const chart = defineType({
       direction: 'direction',
       chartType: 'chartType',
       presentation: 'presentation',
-      isDonut: 'isDonut',
     },
     prepare(selection) {
-      const {title, bars, groups, direction, chartType, presentation, isDonut} = selection as any
+      const {title, bars, groups, direction, chartType, presentation} = selection as any
       const ct = chartType || 'pie'
-      // prefer explicit chartType === 'donut' or presentation === 'donut', fall back to legacy isDonut
-      const donut = ct === 'donut' || presentation === 'donut' || Boolean(isDonut)
+      const donut = ct === 'donut' || presentation === 'donut'
       let count = 0
       if (groups) {
         count = groups.reduce((acc: number, g: any) => acc + (g?.bars?.length || 0), 0)
@@ -192,7 +179,7 @@ export const chart = defineType({
       }
       return {
         title: title || 'Chart',
-        subtitle: `${count} items · ${direction || 'vertical'} · ${ct}${donut ? ' · donut' : ''}`,
+        subtitle: `${count} items \\u00b7 ${direction || 'vertical'} \\u00b7 ${ct}${donut ? ' \\u00b7 donut' : ''}`,
       }
     },
   },
