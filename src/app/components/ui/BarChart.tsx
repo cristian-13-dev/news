@@ -33,7 +33,7 @@ export interface BarChartValue {
   }>
   slices?: BarChartData[]
   direction?: 'vertical' | 'horizontal'
-  palette?: string
+  presentation?: 'pie' | 'donut'
   aspectRatio?: string
   groupGap?: number
   grid?: {
@@ -58,15 +58,16 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
     slices = [],
     groups = [],
     direction = 'vertical',
-    palette = 'default',
     aspectRatio = '16:10',
     groupGap = 6,
     grid = { show: false, color: '#E5E7EB', strokeWidth: 1, opacity: 0.6 },
   } = value || {}
 
-  const colors = PALETTES[palette] || PALETTES.default
+  // Palette removed from schema; always use default palette
+  const colors = PALETTES.default
   const hasGroups = Array.isArray(groups) && groups.length > 0
-  const gridEnabled = !!grid?.show
+  // local defaults (legacy fields removed from schema)
+  const groupGapDefault = 6
 
   const [isMobile, setIsMobile] = React.useState(false)
 
@@ -140,9 +141,7 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
                     </>
                   )}
                   <Tooltip />
-                  {gridEnabled && (
-                    <CartesianGrid stroke={grid?.color || '#E5E7EB'} strokeWidth={grid?.strokeWidth || 1} opacity={grid?.opacity ?? 0.6} />
-                  )}
+                  {/* grid support removed; legacy `grid` field is ignored */}
                   <Bar dataKey="value" radius={isHorizontal ? [0, 8, 8, 0] : [8, 8, 0, 0]}>
                     {data.map((entry, i) => (
                       <Cell key={i} fill={entry.color || colors[i % colors.length]} />
@@ -215,7 +214,7 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
     // PIE / DONUT charts — expect `slices` array
     if (chartType === 'pie' || chartType === 'donut') {
       const pieData = slices || data
-      const isDonut = chartType === 'donut' || (value as any)?.isDonut
+      const isDonut = chartType === 'donut' || (value as any)?.presentation === 'donut' || (value as any)?.isDonut
       return (
         <div style={{ width: '100%', height: 260 }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -235,7 +234,7 @@ export const BarChartComponent: React.FC<BarChartProps> = ({ value }) => {
     return (
       <div style={{ width: '100%' }}>
         <div style={{ width: '100%', marginTop: 8 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: Math.max(4, groupGap) }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: Math.max(4, groupGapDefault) }}>
             {groups.map((g, gi) => {
               const data = (g.bars || []).map((b) => ({ label: b.label, value: b.value, color: b.color }))
               return (

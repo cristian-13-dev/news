@@ -1,7 +1,7 @@
 import { type SchemaTypeDefinition } from 'sanity'
 
 import {blockContentType} from './blockContentType'
-import {chart} from './barChart'
+import {chart, barChart} from './barChart'
 import {categoryType} from './categoryType'
 import {postType} from './postType'
 import {authorType} from './authorType'
@@ -11,5 +11,5 @@ import {comparisonType} from './comparisonType'
 import {prosConsType} from './prosConsType'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [blockContentType, categoryType, postType, authorType, tableType, videoType, comparisonType, prosConsType, chart],
+  types: [blockContentType, categoryType, postType, authorType, tableType, videoType, comparisonType, prosConsType, chart, barChart],
 }

@@ -18,7 +18,7 @@ export const chart = defineType({
         ],
         layout: 'radio',
       },
-      initialValue: 'pie',
+      initialValue: 'bar',
     }),
     defineField({
       name: 'title',
@@ -103,6 +103,22 @@ export const chart = defineType({
     }),
 
     // Simple toggles to switch between Pie and Donut presentation (merged)
+    // Presentation selector: use a single radio for Pie vs Donut (keep legacy fields for compatibility)
+    defineField({
+      name: 'presentation',
+      title: 'Presentation',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Pie', value: 'pie' },
+          { title: 'Donut', value: 'donut' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'pie',
+      hidden: ({parent}) => parent?.chartType !== 'pie',
+    }),
+    // Legacy boolean toggles (kept for old documents) - can be removed after migration
     defineField({ name: 'isPie', title: 'Show as Pie', type: 'boolean', initialValue: false, hidden: ({parent}) => parent?.chartType !== 'pie' }),
     defineField({ name: 'isDonut', title: 'Show as Donut', type: 'boolean', initialValue: true, hidden: ({parent}) => parent?.chartType !== 'pie' }),
     
@@ -160,11 +176,14 @@ export const chart = defineType({
       groups: 'groups',
       direction: 'direction',
       chartType: 'chartType',
+      presentation: 'presentation',
       isDonut: 'isDonut',
     },
     prepare(selection) {
-      const {title, bars, groups, direction, chartType, isDonut} = selection as any
+      const {title, bars, groups, direction, chartType, presentation, isDonut} = selection as any
       const ct = chartType || 'pie'
+      // prefer explicit chartType === 'donut' or presentation === 'donut', fall back to legacy isDonut
+      const donut = ct === 'donut' || presentation === 'donut' || Boolean(isDonut)
       let count = 0
       if (groups) {
         count = groups.reduce((acc: number, g: any) => acc + (g?.bars?.length || 0), 0)
@@ -173,8 +192,15 @@ export const chart = defineType({
       }
       return {
         title: title || 'Chart',
-        subtitle: `${count} items · ${direction || 'vertical'} · ${ct}${isDonut ? ' · donut' : ''}`,
+        subtitle: `${count} items · ${direction || 'vertical'} · ${ct}${donut ? ' · donut' : ''}`,
       }
     },
   },
 })
+
+// Backwards-compatible alias named `barChart` for legacy blocks/documents
+export const barChart = {
+  ...chart,
+  name: 'barChart',
+  title: 'Chart',
+} as any

@@ -99,5 +99,14 @@ export const blockContentType = defineType({
         }
       }
     }),
+    // Backwards-compatible `barChart` block type
+    defineArrayMember({
+      type: 'barChart',
+      components: {
+        preview: (props) => {
+          return React.createElement(BarChartRenderer, props)
+        }
+      }
+    }),
   ],
 })

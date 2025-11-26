@@ -26,19 +26,22 @@ export default function BarChartRenderer({value}: {value: any}) {
     bars = [],
     groups = [],
     direction = 'vertical',
-    palette = 'default',
     aspectRatio = '16:10',
     groupGap = 6,
     grid = { show: false, color: '#E5E7EB', strokeWidth: 1, spacing: 48, opacity: 0.6 },
   } = value || {}
 
-  const colors = PALETTES[palette] || PALETTES.default
+  // Palette removed from schema; always use default palette here
+  const colors = PALETTES.default
+
+  // Local defaults (legacy fields removed from schema)
+  const groupGapDefault = 6
 
   if ((!bars || bars.length === 0) && (!groups || groups.length === 0)) {
     // Show the component name in Studio when there's no data
     return (
       <div style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: 12, textAlign: 'center', color: '#6B7280' }}>
-        <div style={{ fontWeight: 700 }}>Bar Chart</div>
+        <div style={{ fontWeight: 700 }}>Chart</div>
       </div>
     )
   }
@@ -48,10 +51,7 @@ export default function BarChartRenderer({value}: {value: any}) {
   const ratio = ratioParts.length === 2 ? (Number(ratioParts[1]) / Number(ratioParts[0])) : 0.625
   const paddingTop = `${(ratio * 100).toFixed(2)}%`
 
-  // grid settings
-  const gridColor = grid?.color || '#E5E7EB'
-  const gridOpacity = typeof grid?.opacity === 'number' ? grid.opacity : 0.6
-  const gridStroke = typeof grid?.strokeWidth === 'number' ? grid.strokeWidth : 1
+  // grid settings removed — legacy `grid` objects in documents will be ignored by the renderer
 
   // small legend renderer (row)
   function renderLegend(data: any[]) {
@@ -95,6 +95,7 @@ export default function BarChartRenderer({value}: {value: any}) {
 
     // Determine chartType from outer value
     const chartType = (value && (value.chartType || 'pie'))
+    const presentation = value?.presentation
 
     if (chartType === 'bar') {
       return (
@@ -115,7 +116,7 @@ export default function BarChartRenderer({value}: {value: any}) {
                   </>
                 )}
                 <Tooltip />
-                {grid?.show && <CartesianGrid stroke={gridColor} strokeWidth={gridStroke} opacity={gridOpacity} />}
+                {/* grid support removed; legacy `grid` field is ignored */}
                 <Bar dataKey="value" radius={isHorizontal ? [0, 8, 8, 0] : [8, 8, 0, 0]}>
                   {data.map((entry, i) => (
                     <Cell key={i} fill={entry.color || colors[i % colors.length]} />
@@ -177,7 +178,7 @@ export default function BarChartRenderer({value}: {value: any}) {
     // PIE / DONUT: expect value.slices or data
     if (chartType === 'pie' || chartType === 'donut') {
       const pieData = (value && value.slices) || data
-      const isDonut = chartType === 'donut' || Boolean((value && value.isDonut))
+      const isDonut = chartType === 'donut' || presentation === 'donut' || Boolean(value?.isDonut)
       return (
         <div style={{ position: 'relative', width: '100%', paddingTop }}>
           <div style={{ position: 'absolute', inset: 0 }}>
@@ -200,7 +201,7 @@ export default function BarChartRenderer({value}: {value: any}) {
   if (groups && groups.length > 0) {
     return (
       <div style={{ width: '100%' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: Math.max(4, groupGap) }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: Math.max(4, groupGapDefault) }}>
             {groups.map((g: any, gi: number) => {
             const data = (g.bars || []).map((b: any) => ({ label: b.label, value: b.value, color: b.color }))
             return (
