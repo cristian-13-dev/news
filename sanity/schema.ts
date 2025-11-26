@@ -1,8 +1,7 @@
 import {defineType, defineArrayMember} from 'sanity'
 import {ImageIcon, BlockquoteIcon} from '@sanity/icons'
 import {BlockquoteRenderer} from '../components/BlockquoteRenderer'
-import BarChartRenderer from '../components/BarChartRenderer'
-import React from 'react'
+import {barChart} from './schemaTypes/barChart'
 
 /**
  * This is the schema type for block content used in the post document type
@@ -94,11 +93,11 @@ export const blockContentType = defineType({
     }),
     defineArrayMember({
       type: 'barChart',
-      components: {
-        preview: (props) => {
-          return React.createElement(BarChartRenderer, props)
-        }
-      }
     }),
   ],
 })
+
+export const schemaTypes = [
+  blockContentType,
+  barChart,
+]

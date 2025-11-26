@@ -5,6 +5,7 @@ import { Table } from '@/components/ui/Table'
 import { Video } from '@/components/ui/Video'
 import { Comparison } from '@/components/ui/Comparison'
 import { ProsCons } from '@/components/ui/ProsCons'
+import { BarChartComponent } from './ui/BarChart'
 
 export const components: PortableTextComponents = {
   block: {
@@ -116,6 +117,10 @@ export const components: PortableTextComponents = {
     },
     prosCons: ({ value }) => {
       return <ProsCons value={value} />
+    },
+    barChart: ({ value }) => {
+      if (!value) return null;
+      return <BarChartComponent value={value} />;
     },
   },
 }
