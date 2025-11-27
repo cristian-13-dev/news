@@ -5,7 +5,7 @@ import { Table } from '@/components/ui/Table'
 import { Video } from '@/components/ui/Video'
 import { Comparison } from '@/components/ui/Comparison'
 import { ProsCons } from '@/components/ui/ProsCons'
-import { BarChartComponent } from './ui/BarChart'
+import ChartWrapper from './ui/ChartWrapper'
 
 export const components: PortableTextComponents = {
   block: {
@@ -120,7 +120,12 @@ export const components: PortableTextComponents = {
     },
     chart: ({ value }) => {
       if (!value) return null;
-      return <BarChartComponent value={value} />;
+      return <ChartWrapper value={value} />;
+    },
+    // Backwards-compatible legacy block type `barChart`
+    barChart: ({ value }) => {
+      if (!value) return null;
+      return <ChartWrapper value={value} />;
     },
   },
 }

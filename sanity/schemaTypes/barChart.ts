@@ -1,4 +1,18 @@
 import {defineType, defineField, defineArrayMember} from 'sanity'
+import {barChartFields} from './barChartFields'
+import {pieDonutChartFields} from './pieDonutChartFields'
+import {lineAreaChartFields} from './lineAreaChartFields'
+
+export const barChartSchema = {
+  name: 'barChart',
+  title: 'Bar Chart',
+  type: 'document',
+  fields: [
+    ...barChartFields,
+    ...pieDonutChartFields,
+    ...lineAreaChartFields,
+  ],
+}
 
 export const chart = defineType({
   name: 'chart',
@@ -19,6 +33,8 @@ export const chart = defineType({
       },
       initialValue: 'bar',
     }),
+
+    // Line/Area selector appears immediately after chartType (hidden unless lineArea)
     defineField({
       name: 'lineAreaType',
       title: 'Line/Area Type',
@@ -32,6 +48,8 @@ export const chart = defineType({
       },
       hidden: ({parent}) => parent?.chartType !== 'lineArea',
     }),
+
+    // Presentation (Pie/Donut) appears immediately after chartType (hidden unless pieDonut)
     defineField({
       name: 'presentation',
       title: 'Presentation',
@@ -45,28 +63,8 @@ export const chart = defineType({
       },
       hidden: ({parent}) => parent?.chartType !== 'pieDonut',
     }),
-    defineField({
-      name: 'bars',
-      title: 'Bars',
-      hidden: ({parent}) => parent?.chartType !== 'bar',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'object',
-          fields: [
-            {name: 'label', title: 'Label', type: 'string'},
-            {name: 'value', title: 'Value', type: 'number'},
-            {name: 'color', title: 'Color', type: 'string'},
-          ],
-        }),
-      ],
-    }),
-    defineField({
-      name: 'title',
-      title: 'Chart Title',
-      type: 'string',
-      description: 'The title of the chart displayed at the top.',
-    }),
+
+    // Direction is only shown for bar charts
     defineField({
       name: 'direction',
       title: 'Direction',
@@ -78,7 +76,47 @@ export const chart = defineType({
         ],
         layout: 'radio',
       },
-      hidden: ({parent}) => parent?.chartType === 'pieDonut' || parent?.chartType === 'lineArea',
+      hidden: ({parent}) => parent?.chartType !== 'bar',
+    }),
+
+    // Title follows the type-specific selectors
+    defineField({
+      name: 'title',
+      title: 'Chart Title',
+      type: 'string',
+      description: 'The title of the chart displayed at the top.',
+    }),
+
+    // Bars and groups for bar charts
+    defineField({
+      name: 'bars',
+      title: 'Bars',
+      hidden: ({parent}) => parent?.chartType !== 'bar',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          fields: [
+            {name: 'label', title: 'Label', type: 'string'},
+            {name: 'value', title: 'Value', type: 'number'},
+            {
+              name: 'color',
+              title: 'Color',
+              type: 'string',
+              options: {
+                list: [
+                  {title: 'Coral Red', value: '#F15B5B'},
+                  {title: 'Violet', value: '#9B5DE5'},
+                  {title: 'Hot Pink', value: '#F15BB5'},
+                  {title: 'Sunshine Yellow', value: '#FEE440'},
+                  {title: 'Sky Blue', value: '#00BBF9'},
+                  {title: 'Mint Teal', value: '#00F5D4'},
+                ],
+              },
+            },
+          ],
+        }),
+      ],
     }),
     defineField({
       name: 'groups',
@@ -101,7 +139,21 @@ export const chart = defineType({
                   fields: [
                     {name: 'label', title: 'Label', type: 'string'},
                     {name: 'value', title: 'Value', type: 'number'},
-                    {name: 'color', title: 'Color', type: 'string'},
+                    {
+                      name: 'color',
+                      title: 'Color',
+                      type: 'string',
+                      options: {
+                        list: [
+                          {title: 'Coral Red', value: '#F15B5B'},
+                          {title: 'Violet', value: '#9B5DE5'},
+                          {title: 'Hot Pink', value: '#F15BB5'},
+                          {title: 'Sunshine Yellow', value: '#FEE440'},
+                          {title: 'Sky Blue', value: '#00BBF9'},
+                          {title: 'Mint Teal', value: '#00F5D4'},
+                        ],
+                      },
+                    },
                   ],
                 }),
               ],
@@ -110,6 +162,8 @@ export const chart = defineType({
         }),
       ],
     }),
+
+    // Series for Line/Area charts
     defineField({
       name: 'series',
       title: 'Series',
@@ -120,7 +174,21 @@ export const chart = defineType({
           type: 'object',
           fields: [
             { name: 'label', title: 'Label', type: 'string' },
-            { name: 'color', title: 'Color', type: 'string' },
+            {
+              name: 'color',
+              title: 'Color',
+              type: 'string',
+              options: {
+                list: [
+                  {title: 'Coral Red', value: '#F15B5B'},
+                  {title: 'Violet', value: '#9B5DE5'},
+                  {title: 'Hot Pink', value: '#F15BB5'},
+                  {title: 'Sunshine Yellow', value: '#FEE440'},
+                  {title: 'Sky Blue', value: '#00BBF9'},
+                  {title: 'Mint Teal', value: '#00F5D4'},
+                ],
+              },
+            },
             {
               name: 'values',
               title: 'Values',
@@ -152,7 +220,21 @@ export const chart = defineType({
           fields: [
             { name: 'label', title: 'Label', type: 'string' },
             { name: 'value', title: 'Value', type: 'number' },
-            { name: 'color', title: 'Color', type: 'string' },
+            {
+              name: 'color',
+              title: 'Color',
+              type: 'string',
+              options: {
+                list: [
+                  {title: 'Coral Red', value: '#F15B5B'},
+                  {title: 'Violet', value: '#9B5DE5'},
+                  {title: 'Hot Pink', value: '#F15BB5'},
+                  {title: 'Sunshine Yellow', value: '#FEE440'},
+                  {title: 'Sky Blue', value: '#00BBF9'},
+                  {title: 'Mint Teal', value: '#00F5D4'},
+                ],
+              },
+            },
           ],
         }),
       ],
