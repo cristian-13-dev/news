@@ -37,9 +37,10 @@ export default function BarChartComponent({ value }: { value: any }) {
       return <div style={{ color: '#EF4444', padding: 16 }}>No data for bar chart.</div>;
     }
     const isHorizontal = direction === "horizontal";
+    const barHeight = 320;
     return (
-      <div style={{ width: "100%", minHeight: 200 }}>
-        <ResponsiveContainer width="100%" aspect={aspect}>
+      <div style={{ width: "100%", minHeight: barHeight }}>
+        <ResponsiveContainer width="100%" height={barHeight}>
           <ReBarChart data={barData} layout={isHorizontal ? "vertical" : "horizontal"}>
             <CartesianGrid stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
             {isHorizontal ? (
@@ -78,9 +79,10 @@ export default function BarChartComponent({ value }: { value: any }) {
       });
       return item;
     });
+    const lineHeight = 360;
     return (
-      <div style={{ width: "100%", minHeight: 200 }}>
-        <ResponsiveContainer width="100%" aspect={aspect}>
+      <div style={{ width: "100%", minHeight: lineHeight }}>
+        <ResponsiveContainer width="100%" height={lineHeight}>
           {effectiveType === "line" ? (
             <LineChart data={chartData} margin={{ left: 0, right: 0, top: 8, bottom: 8 }}>
               <CartesianGrid stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
@@ -142,8 +144,7 @@ export default function BarChartComponent({ value }: { value: any }) {
       return <div style={{ color: '#EF4444', padding: 16 }}>No data for pie/donut chart.</div>;
     }
     const isDonut = effectiveType === "donut";
-    // Slightly smaller than the previous very large size but still prominent
-    const pieHeight = 520; // reduced fixed height
+    const pieHeight = 520;
     const outerRadius = 180;
     const innerRadius = isDonut ? 90 : 0;
     return (

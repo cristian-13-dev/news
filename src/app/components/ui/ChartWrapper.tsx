@@ -54,6 +54,38 @@ export default function ChartWrapper({ value }: ChartWrapperProps) {
   }, [value]);
 
   const [showDebug, setShowDebug] = React.useState(false)
+  const [debugQueryEnabled, setDebugQueryEnabled] = React.useState(false)
+  const containerRef = React.useRef<HTMLDivElement | null>(null)
+  const [rect, setRect] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('chartDebug') === '1') {
+        setDebugQueryEnabled(true)
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [])
+
+  React.useEffect(() => {
+    if (!debugQueryEnabled) return
+    const el = containerRef.current
+    if (!el) return
+    const obs = new ResizeObserver(() => {
+      const r = el.getBoundingClientRect()
+      setRect({ width: Math.round(r.width), height: Math.round(r.height), top: Math.round(r.top), left: Math.round(r.left) })
+      // eslint-disable-next-line no-console
+      console.log('[ChartWrapper debug] rect', r, 'computed:', computed)
+    })
+    obs.observe(el)
+    // initial
+    const r = el.getBoundingClientRect()
+    setRect({ width: Math.round(r.width), height: Math.round(r.height), top: Math.round(r.top), left: Math.round(r.left) })
+    return () => obs.disconnect()
+  }, [debugQueryEnabled, computed])
 
   return (
     <div>
@@ -65,13 +97,19 @@ export default function ChartWrapper({ value }: ChartWrapperProps) {
         <pre style={{ whiteSpace: 'pre-wrap', background: '#f9fafb', padding: 12, borderRadius: 8, marginTop: 8 }}>{JSON.stringify(computed, null, 2)}</pre>
       ) : null}
 
-      <div style={{ minHeight: 200, marginTop: 8 }}>
+      <div ref={containerRef} style={{ minHeight: 200, marginTop: 8, position: 'relative', outline: debugQueryEnabled ? '2px dashed magenta' : undefined }}>
         {/* If value is a debug/test { type: 'bars', data: [...] } object, map to BarChartComponent prop shape */}
         {value && value.type === 'bars' && Array.isArray(value.data) ? (
           <BarChartComponent value={{ bars: value.data }} />
         ) : (
           <BarChartComponent value={value} />
         )}
+        {debugQueryEnabled ? (
+          <div style={{ position: 'absolute', right: 8, top: 8, background: 'rgba(0,0,0,0.6)', color: '#fff', padding: 8, borderRadius: 6, fontSize: 12, zIndex: 9999 }}>
+            <div><strong>type:</strong> {computed.type}</div>
+            <div><strong>rect:</strong> {rect ? `${rect.width}x${rect.height}` : 'measuring...'}</div>
+          </div>
+        ) : null}
       </div>
     </div>
   )

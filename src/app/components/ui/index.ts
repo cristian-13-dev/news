@@ -5,4 +5,4 @@ export { PostCard } from './PostCard'
 export { PageHeader } from './PageHeader'
 export { PostImage } from './PostImage'
 
-export { BarChartComponent } from './BarChart'
+export { default as BarChartComponent } from './BarChart'
