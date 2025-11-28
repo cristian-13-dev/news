@@ -73,7 +73,7 @@ function renderPieLabel(props: any, isMobile = false) {
   const { cx, cy, midAngle, innerRadius, outerRadius, percent, value } = props as any;
   const text = String(value?.display ?? value?.value ?? value ?? "");
   const padding = 6;
-  const fontSize = 12;
+  const fontSize = isMobile ? 16 : 14; // larger labels for readability
 
   // Keep skipping very small slices to avoid overlap
   if (typeof percent === 'number' && percent < 0.04) return null;
@@ -85,13 +85,13 @@ function renderPieLabel(props: any, isMobile = false) {
   const y = cy + radius * Math.sin(angle);
 
   if (isMobile) {
-    // On mobile render plain white bold text (no background)
+    // On mobile render plain white bold text (no background), larger for readability
     return (
-      <text x={x} y={y + fontSize / 3} textAnchor="middle" fill="#ffffff" fontSize={fontSize} fontWeight={700}>{text}</text>
+      <text x={x} y={y + fontSize / 3} textAnchor="middle" fill="#ffffff" fontSize={fontSize} fontWeight={800}>{text}</text>
     );
   }
 
-  const textWidth = Math.min(120, text.length * (fontSize * 0.6) + 8);
+  const textWidth = Math.min(180, text.length * (fontSize * 0.7) + 12);
   const rectW = textWidth + padding * 2;
   const rectH = fontSize + padding;
   const rectX = x - rectW / 2;
@@ -100,7 +100,7 @@ function renderPieLabel(props: any, isMobile = false) {
   return (
     <g>
       <rect x={rectX} y={rectY} width={rectW} height={rectH} rx={6} fill="#fff" />
-      <text x={x} y={rectY + rectH / 2 + fontSize / 3} textAnchor="middle" fill="#111827" fontSize={fontSize} fontWeight={600}>{text}</text>
+      <text x={x} y={rectY + rectH / 2 + fontSize / 3} textAnchor="middle" fill="#111827" fontSize={fontSize} fontWeight={700}>{text}</text>
     </g>
   );
 }
@@ -110,11 +110,14 @@ function toNumber(v: any) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function ChartCanvas({ title, children, minHeight }: any) {
+function ChartCanvas({ title, children, minHeight, compact = false }: any) {
+  const outerPadding = compact ? '6px 0' : '14px 0';
+  const innerPadding = compact ? 8 : 16;
+  const titleMargin = compact ? 6 : 8;
   return (
-    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '14px 0' }}>
-      <div style={{ width: '100%', maxWidth: 1100, background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 8px 24px rgba(16,24,40,0.04)', border: '1px solid rgba(15,23,42,0.04)' }}>
-        {title ? <div style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 8, textAlign: 'center' }}>{title}</div> : null}
+    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: outerPadding }}>
+      <div style={{ width: '100%', maxWidth: 1100, background: '#fff', borderRadius: 12, padding: innerPadding, boxShadow: '0 8px 24px rgba(16,24,40,0.04)', border: '1px solid rgba(15,23,42,0.04)' }}>
+        {title ? <div style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: titleMargin, textAlign: 'center' }}>{title}</div> : null}
         <div style={{ width: '100%', minHeight }}>{children}</div>
       </div>
     </div>
@@ -301,20 +304,21 @@ export default function BarChartComponent({ value }: { value: any }) {
       return <div style={{ color: '#EF4444', padding: 16 }}>No data for pie/donut chart.</div>;
     }
     const isDonut = effectiveType === "donut";
-    // Reduce pie/donut canvas size to better fit mobile and avoid excessive whitespace
-    const pieHeight = isMobile ? 240 : 380;
-    const outerRadius = isMobile ? 80 : 140;
-    const innerRadius = isDonut ? (isMobile ? 48 : 84) : 0;
+    // Adjust pie/donut canvas size: make larger for readability
+    const pieHeight = isMobile ? 360 : 520;
+    const outerRadius = isMobile ? 140 : 200;
+    const innerRadius = isDonut ? (isMobile ? 84 : 110) : 0;
     const total = (pieData || []).reduce((s: number, x: any) => s + toNumber(x?.value), 0);
     const totalDisplay = typeof total === 'number' ? total.toLocaleString() : String(total);
 
     return (
-      <ChartCanvas title={title} minHeight={pieHeight}>
+      <ChartCanvas title={title} minHeight={pieHeight} compact={isMobile}>
         <div style={{ position: 'relative', width: '100%' }}>
           <ResponsiveContainer width="100%" height={pieHeight}>
-            <PieChart>
+            <PieChart margin={{ top: 8, right: 0, bottom: 0, left: 0 }}>
               <Tooltip />
-              {showLegend ? <Legend content={renderLegend} layout="horizontal" verticalAlign="bottom" align="center" /> : null}
+              {/* Render native Legend only on desktop; on mobile render the HTML legend below the chart to avoid built-in extra padding */}
+              {!isMobile && showLegend ? <Legend content={renderLegend} layout="horizontal" verticalAlign="bottom" align="center" /> : null}
               <Pie
                 data={pieData as any}
                 dataKey="value"
@@ -343,10 +347,12 @@ export default function BarChartComponent({ value }: { value: any }) {
                     content={(props: any) => {
                       const cx = props.cx ?? (props.viewBox && props.viewBox.x + (props.viewBox.width || 0) / 2) ?? 0;
                       const cy = props.cy ?? (props.viewBox && props.viewBox.y + (props.viewBox.height || 0) / 2) ?? 0;
-                      const rectW = 86;
-                      const rectH = 36;
+                      const rectW = isMobile ? 120 : 140;
+                      const rectH = isMobile ? 48 : 64;
                       const rectX = cx - rectW / 2;
                       const rectY = cy - rectH / 2;
+                      const centerFont = isMobile ? 20 : 24;
+                      const subFont = isMobile ? 12 : 13;
                       return (
                         <g>
                           <defs>
@@ -355,8 +361,8 @@ export default function BarChartComponent({ value }: { value: any }) {
                             </filter>
                           </defs>
                           <rect x={rectX} y={rectY} width={rectW} height={rectH} rx={10} fill="#fff" stroke="rgba(15,23,42,0.04)" strokeWidth={1} filter="url(#donut-center-shadow)" />
-                          <text x={cx} y={rectY + 18} textAnchor="middle" fill="#111827" fontSize={15} fontWeight={700}>{totalDisplay}</text>
-                          <text x={cx} y={rectY + 30} textAnchor="middle" fill="#6B7280" fontSize={11}>Total</text>
+                          <text x={cx} y={rectY + (rectH / 2) - (subFont / 2)} textAnchor="middle" fill="#111827" fontSize={centerFont} fontWeight={800}>{totalDisplay}</text>
+                          <text x={cx} y={rectY + (rectH / 2) + (centerFont / 2)} textAnchor="middle" fill="#6B7280" fontSize={subFont}>Total</text>
                         </g>
                       );
                     }}
@@ -365,6 +371,12 @@ export default function BarChartComponent({ value }: { value: any }) {
               </Pie>
             </PieChart>
           </ResponsiveContainer>
+            {/* On mobile render the HTML legend below the chart to avoid Recharts internal padding */}
+            {isMobile && showLegend ? (
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: 8 }}>
+                {renderLegend({ payload: pieData.map((p: any, i: number) => ({ value: p.label, color: p.color || palette[i % palette.length], payload: { name: p.label, color: p.color || palette[i % palette.length] } })) })}
+              </div>
+            ) : null}
         </div>
       </ChartCanvas>
     );
