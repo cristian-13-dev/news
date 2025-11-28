@@ -1,20 +1,39 @@
 "use client"
 
 import * as React from "react";
-import { BarChart as ReBarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, AreaChart, Area, PieChart, Pie, Legend, CartesianGrid, LabelList, Label } from "recharts";
+import {
+  BarChart as ReBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  LabelList,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Legend,
+  CartesianGrid,
+  Label,
+} from "recharts";
 
 const COLORS = [
   "#f07165", // Red
   "#f0b665", // Orange
   "#ffde82", // Yellow
-  "#7ad46e", // Green
+  "#6eeb78", // Green
   "#6ecceb", // Blue
   "#8679f7", // Indigo
   "#bc79f7", // Purple
   "#fa89cf", // Pink
 ];
+
 function renderBarValueLabel(props: any) {
-  const { x, y, width, height, value, index } = props;
+  const { x, y, width, height, value } = props;
   const cx = x + (width || 0) / 2;
   const cy = y + (height || 0) / 2;
   const text = String(value?.display ?? value?.value ?? value ?? "");
@@ -34,8 +53,8 @@ function renderBarValueLabel(props: any) {
 }
 
 function renderLegend(props: any) {
-  const { payload } = props || {}
-  if (!payload || !Array.isArray(payload)) return null
+  const { payload } = props || {};
+  if (!payload || !Array.isArray(payload)) return null;
   return (
     <div style={{ display: 'flex', width: '100%', justifyContent: 'center', padding: '8px 0' }}>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '0 6px', background: 'transparent', borderRadius: 0, boxShadow: 'none', border: 'none', maxWidth: 'min(720px, 100%)' }}>
@@ -47,24 +66,30 @@ function renderLegend(props: any) {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-function renderPieLabel(props: any) {
+function renderPieLabel(props: any, isMobile = false) {
   const { cx, cy, midAngle, innerRadius, outerRadius, percent, value } = props as any;
   const text = String(value?.display ?? value?.value ?? value ?? "");
   const padding = 6;
   const fontSize = 12;
 
-  // Skip rendering labels for very small slices to avoid overlap
+  // Keep skipping very small slices to avoid overlap
   if (typeof percent === 'number' && percent < 0.04) return null;
 
-  // Compute centroid inside the slice: halfway between inner and outer radius
   const radius = (innerRadius + outerRadius) / 2;
   const RAD = Math.PI / 180;
-  const angle = -midAngle * RAD; // Recharts midAngle is in degrees; invert for canvas coords
+  const angle = -midAngle * RAD;
   const x = cx + radius * Math.cos(angle);
   const y = cy + radius * Math.sin(angle);
+
+  if (isMobile) {
+    // On mobile render plain white bold text (no background)
+    return (
+      <text x={x} y={y + fontSize / 3} textAnchor="middle" fill="#ffffff" fontSize={fontSize} fontWeight={700}>{text}</text>
+    );
+  }
 
   const textWidth = Math.min(120, text.length * (fontSize * 0.6) + 8);
   const rectW = textWidth + padding * 2;
@@ -79,6 +104,7 @@ function renderPieLabel(props: any) {
     </g>
   );
 }
+
 function toNumber(v: any) {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
@@ -114,15 +140,19 @@ export default function BarChartComponent({ value }: { value: any }) {
   const ratioParts = (aspectRatio || "16:10").split(":");
   const aspect = ratioParts.length === 2 ? Number(ratioParts[0]) / Number(ratioParts[1]) : 16 / 9;
 
+  const [windowWidth, setWindowWidth] = React.useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  const isMobile = windowWidth < 640;
+
   const barData = (bars || []).map((b: any) => ({ label: b.label, value: toNumber(b.value), color: b.color }));
   const pieData = (slices && slices.length ? slices : barData);
   const palette = COLORS;
-  // Precompute shuffled palettes (hooks must be called unconditionally)
-  const shuffledPaletteForBars = React.useMemo(() => shuffleArray(palette), [JSON.stringify(barData.map((d: any) => d.label))]);
-  const shuffledPaletteForSeries = React.useMemo(() => shuffleArray(palette), [JSON.stringify((series || []).map((s: any) => s.label))]);
-  const shuffledPaletteForPie = React.useMemo(() => shuffleArray(palette), [JSON.stringify(pieData.map((p: any) => p.label))]);
 
-  // Helper: shuffle an array (Fisher-Yates)
   function shuffleArray<T>(arr: T[]) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -133,58 +163,63 @@ export default function BarChartComponent({ value }: { value: any }) {
     }
     return a;
   }
+
+  const shuffledPaletteForBars = React.useMemo(() => shuffleArray(palette), [JSON.stringify(barData.map((d: any) => d.label))]);
+  const shuffledPaletteForSeries = React.useMemo(() => shuffleArray(palette), [JSON.stringify((series || []).map((s: any) => s.label))]);
+  const shuffledPaletteForPie = React.useMemo(() => shuffleArray(palette), [JSON.stringify(pieData.map((p: any) => p.label))]);
+
   if (effectiveType === "bar") {
-    // If none of the bars have colors, use a shuffled palette for this render
-    const needShuffle = barData.length > 0 && barData.every((d: any) => !d.color);
-    const usedPalette = needShuffle ? shuffledPaletteForBars : palette;
     if (!bars || bars.length === 0) {
       return <div style={{ color: '#EF4444', padding: 16 }}>No data for bar chart.</div>;
     }
     const isHorizontal = direction === "horizontal";
+    const needShuffle = barData.length > 0 && barData.every((d: any) => !d.color);
+    const usedPalette = needShuffle ? shuffledPaletteForBars : palette;
 
-    const minHeight = 220;
+    const minHeight = isMobile ? 260 : 220;
     return (
       <ChartCanvas title={title} minHeight={minHeight}>
-        <ResponsiveContainer width="100%" aspect={aspect}>
+        <ResponsiveContainer width="100%" aspect={isMobile ? Math.min(aspect, 1.2) : aspect}>
           <ReBarChart data={barData} layout={isHorizontal ? "vertical" : "horizontal"}>
             <CartesianGrid stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
             {isHorizontal ? (
               <>
-                <XAxis type="number" />
-                <YAxis dataKey="label" type="category" />
+                <XAxis type="number" hide={isMobile} />
+                <YAxis dataKey="label" type="category" hide={isMobile} />
               </>
             ) : (
               <>
-                  <XAxis dataKey="label" type="category" padding={{ left: 0, right: 0 }} />
-                <YAxis />
+                <XAxis dataKey="label" type="category" padding={{ left: 0, right: 0 }} hide={isMobile} />
+                <YAxis hide={isMobile} />
               </>
             )}
             <Tooltip />
-            <Bar dataKey="value" radius={isHorizontal ? [0, 8, 8, 0] : [8, 8, 0, 0]}> 
+              <Bar dataKey="value" radius={isHorizontal ? [0, 8, 8, 0] : [8, 8, 0, 0]}> 
               {barData.map((d: any, i: number) => (
-                 <Cell key={i} fill={d.color || usedPalette[i % usedPalette.length]} />
+                <Cell key={i} fill={d.color || usedPalette[i % usedPalette.length]} />
               ))}
               <LabelList dataKey="value" content={renderBarValueLabel} />
             </Bar>
           </ReBarChart>
         </ResponsiveContainer>
-          {showLegend ? (
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: 10 }}>
-              {renderLegend({ payload: barData.map((d: any, i: number) => ({ value: d.label, color: d.color || palette[i % palette.length], payload: { name: d.label, color: d.color || palette[i % palette.length] } })) })}
-            </div>
-          ) : null}
+        {showLegend ? (
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: 10 }}>
+            {renderLegend({ payload: barData.map((d: any, i: number) => ({ value: d.label, color: d.color || palette[i % palette.length], payload: { name: d.label, color: d.color || palette[i % palette.length] } })) })}
+          </div>
+        ) : null}
       </ChartCanvas>
     );
   }
+
   if (effectiveType === "line" || effectiveType === "area") {
     const seriesArr = series || [];
     if (!seriesArr.length) {
       return <div style={{ color: '#EF4444', padding: 16 }}>No data for line/area chart.</div>;
     }
-    // If none of the series have colors, use a shuffled palette for this render
-    const needShuffleSeries = seriesArr.length > 0 && seriesArr.every((s: any) => !s.color)
-    const usedPaletteSeries = needShuffleSeries ? shuffledPaletteForSeries : palette
+    const needShuffleSeries = seriesArr.length > 0 && seriesArr.every((s: any) => !s.color);
+    const usedPaletteSeries = needShuffleSeries ? shuffledPaletteForSeries : palette;
     const labels = Array.from(new Set(seriesArr.flatMap((s: any) => (s.values || []).map((v: any) => v.label)))) as string[];
+    const tickInterval = isMobile && labels.length > 4 ? Math.ceil(labels.length / 4) : 0;
     const chartData = labels.map((label) => {
       const item: any = { label };
       seriesArr.forEach((s: any, i: number) => {
@@ -193,51 +228,52 @@ export default function BarChartComponent({ value }: { value: any }) {
       });
       return item;
     });
-    const minHeight = 240;
+
+    const minHeight = isMobile ? 200 : 240;
     return (
       <ChartCanvas title={title} minHeight={minHeight}>
-        <ResponsiveContainer width="100%" aspect={aspect}>
+        <ResponsiveContainer width="100%" aspect={isMobile ? Math.min(aspect, 1.4) : aspect}>
           {effectiveType === "line" ? (
             <LineChart data={chartData} margin={{ left: 0, right: 0, top: 8, bottom: 8 }}>
               <CartesianGrid stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
-                <XAxis dataKey="label" type="category" interval={0} padding={{ left: 0, right: 0 }} />
-                <YAxis domain={[0, 'dataMax']} />
-                <Tooltip />
-                {showLegend ? <Legend content={renderLegend} layout="horizontal" verticalAlign="bottom" align="center" /> : null}
-                {(() => {
-                    const order = seriesArr.map((_: any, idx: number) => idx).reverse();
-                      return order.map((si: number) => {
-                    const s = seriesArr[si];
-                    return (
-                      <Line
-                        key={si}
-                        name={s?.label || s?.name}
-                        type={s?.curve || 'monotone'}
-                        dataKey={`s${si}`}
-                        stroke={s.color || usedPaletteSeries[si % usedPaletteSeries.length]}
-                        dot={s?.showDots ? { r: 3, stroke: s.color || usedPaletteSeries[si % usedPaletteSeries.length], strokeWidth: 1, fill: '#fff' } : false}
-                        strokeWidth={s?.strokeWidth ?? 2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        isAnimationActive={false}
-                      />
-                    );
-                  });
-                })()}
+              <XAxis dataKey="label" type="category" interval={isMobile ? tickInterval : 0} padding={{ left: 0, right: 0 }} tick={{ angle: isMobile ? -45 : 0, textAnchor: isMobile ? 'end' : 'middle', fontSize: isMobile ? 11 : 13 } as any} height={isMobile ? 56 : undefined} />
+              <YAxis domain={[0, 'dataMax']} />
+              <Tooltip />
+              {showLegend ? <Legend content={renderLegend} layout="horizontal" verticalAlign="bottom" align="center" /> : null}
+              {(() => {
+                const order = seriesArr.map((_: any, idx: number) => idx).reverse();
+                return order.map((si: number) => {
+                  const s = seriesArr[si];
+                  return (
+                    <Line
+                      key={si}
+                      name={s?.label || s?.name}
+                      type={s?.curve || 'monotone'}
+                      dataKey={`s${si}`}
+                      stroke={s.color || usedPaletteSeries[si % usedPaletteSeries.length]}
+                      dot={s?.showDots ? { r: isMobile ? 2 : 3, stroke: s.color || usedPaletteSeries[si % usedPaletteSeries.length], strokeWidth: 1, fill: '#fff' } : false}
+                      strokeWidth={s?.strokeWidth ?? (isMobile ? 1.5 : 2)}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      isAnimationActive={false}
+                    />
+                  );
+                });
+              })()}
             </LineChart>
           ) : (
             <AreaChart data={chartData} margin={{ left: 0, right: 0, top: 8, bottom: 8 }}>
               <CartesianGrid stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
-              <XAxis dataKey="label" type="category" interval={0} padding={{ left: 0, right: 0 }} />
+              <XAxis dataKey="label" type="category" interval={isMobile ? tickInterval : 0} padding={{ left: 0, right: 0 }} tick={{ angle: isMobile ? -45 : 0, textAnchor: isMobile ? 'end' : 'middle', fontSize: isMobile ? 11 : 13 } as any} height={isMobile ? 56 : undefined} />
               <YAxis domain={[0, 'dataMax']} />
               <Tooltip />
               {showLegend ? <Legend content={renderLegend} layout="horizontal" verticalAlign="bottom" align="center" /> : null}
-                {(() => {
-                    const order = seriesArr.map((_: any, idx: number) => idx).reverse();
-                      return order.map((si: number) => {
-                    const s = seriesArr[si];
-                    return (
-                        <Area
+              {(() => {
+                const order = seriesArr.map((_: any, idx: number) => idx).reverse();
+                return order.map((si: number) => {
+                  const s = seriesArr[si];
+                  return (
+                    <Area
                       key={si}
                       name={s?.label || s?.name}
                       type={s?.curve || 'monotone'}
@@ -245,7 +281,7 @@ export default function BarChartComponent({ value }: { value: any }) {
                       stroke={s.color || usedPaletteSeries[si % usedPaletteSeries.length]}
                       fill={s.color || usedPaletteSeries[si % usedPaletteSeries.length]}
                       fillOpacity={s?.fillOpacity ?? 0.45}
-                      strokeWidth={s?.strokeWidth ?? 2}
+                      strokeWidth={s?.strokeWidth ?? (isMobile ? 1.5 : 2)}
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       isAnimationActive={false}
@@ -259,14 +295,16 @@ export default function BarChartComponent({ value }: { value: any }) {
       </ChartCanvas>
     );
   }
+
   if (effectiveType === "pie" || effectiveType === "donut") {
     if (!pieData || !pieData.length) {
       return <div style={{ color: '#EF4444', padding: 16 }}>No data for pie/donut chart.</div>;
     }
     const isDonut = effectiveType === "donut";
-    const pieHeight = 520;
-    const outerRadius = 180;
-    const innerRadius = isDonut ? 90 : 0;
+    // Reduce pie/donut canvas size to better fit mobile and avoid excessive whitespace
+    const pieHeight = isMobile ? 240 : 380;
+    const outerRadius = isMobile ? 80 : 140;
+    const innerRadius = isDonut ? (isMobile ? 48 : 84) : 0;
     const total = (pieData || []).reduce((s: number, x: any) => s + toNumber(x?.value), 0);
     const totalDisplay = typeof total === 'number' ? total.toLocaleString() : String(total);
 
@@ -285,7 +323,7 @@ export default function BarChartComponent({ value }: { value: any }) {
                 cy="50%"
                 outerRadius={outerRadius}
                 innerRadius={innerRadius}
-                label={renderPieLabel}
+                label={(p: any) => renderPieLabel(p, isMobile)}
                 labelLine={false}
                 paddingAngle={3}
                 cornerRadius={8}
@@ -293,11 +331,11 @@ export default function BarChartComponent({ value }: { value: any }) {
                 strokeWidth={1}
               >
                 {(() => {
-                  const needShufflePie = pieData.length > 0 && pieData.every((p: any) => !p.color)
-                  const usedPalettePie = needShufflePie ? shuffledPaletteForPie : palette
+                  const needShufflePie = pieData.length > 0 && pieData.every((p: any) => !p.color);
+                  const usedPalettePie = needShufflePie ? shuffledPaletteForPie : palette;
                   return pieData.map((entry: any, i: number) => (
                     <Cell key={entry._key || i} fill={entry.color || usedPalettePie[i % usedPalettePie.length]} />
-                  ))
+                  ));
                 })()}
                 {isDonut ? (
                   <Label
