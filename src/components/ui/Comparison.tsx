@@ -49,7 +49,7 @@ export function Comparison({ value }: ComparisonProps) {
             {items.map((item, index) => (
               <article
                 key={index}
-                className="flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-transform duration-150 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-slate-100"
+                className="flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-100"
               >
                 <div className="p-6 text-center">
                   {item.image ? (

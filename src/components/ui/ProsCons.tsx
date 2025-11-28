@@ -56,10 +56,7 @@ export function ProsCons({ value }: ProsConsProps) {
 
       <div className={`grid gap-6 ${items.length === 1 ? 'grid-cols-1 max-w-2xl mx-auto' : items.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
         {items.map((item, index) => (
-          <div
-            key={index}
-            className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-          >
+          <div key={index} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
             {/* Item Header */}
             <div className="p-4 bg-gray-50 border-b border-gray-200">
               {item.image && (
