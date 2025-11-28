@@ -99,7 +99,9 @@ export const blockContentType = defineType({
         }
       }
     }),
-    // Backwards-compatible `barChart` block type
+    // Keep a hidden legacy member for backward compatibility so existing
+    // documents with `_type: 'barChart'` remain valid, but hide it from
+    // the editor insert menu to avoid duplicates.
     defineArrayMember({
       type: 'barChart',
       components: {

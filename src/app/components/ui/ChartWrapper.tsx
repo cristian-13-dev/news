@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from 'react'
-import BarChartComponent from './BarChart'
+import BarChartComponent from './Chart'
 
 interface ChartWrapperProps {
   value: any
@@ -15,6 +15,24 @@ export default function ChartWrapper({ value }: ChartWrapperProps) {
 
   const computed = React.useMemo(() => {
     if (!value) return { type: null, data: null };
+    // Handle legacy block shape where the block _type may be 'barChart'
+    if (value && value._type === 'barChart') {
+      if (Array.isArray(value.bars)) {
+        return {
+          type: 'bars',
+          data: (value.bars || []).map((b: any) => ({ label: b.label, value: b.value, color: b.color })),
+        };
+      }
+      if (Array.isArray(value.groups)) {
+        return {
+          type: 'groups',
+          data: value.groups.map((g: any) => ({ label: g.label, bars: (g.bars || []).map((b: any) => ({ label: b.label, value: b.value, color: b.color })) })),
+        };
+      }
+      // If we got here and there are no bars/groups, still return the raw value for inspection
+      return { type: 'bars', data: value.bars || [] };
+    }
+
     if (Array.isArray(value.bars)) {
       return {
         type: 'bars',
@@ -50,6 +68,8 @@ export default function ChartWrapper({ value }: ChartWrapperProps) {
         data: value.data,
       };
     }
+    // If nothing matched, return unknown but include the incoming shape so
+    // it's easier to debug in the Studio / browser console.
     return { type: 'unknown', data: value };
   }, [value]);
 

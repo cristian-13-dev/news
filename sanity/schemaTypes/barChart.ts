@@ -103,16 +103,18 @@ export const chart = defineType({
               name: 'color',
               title: 'Color',
               type: 'string',
-              options: {
-                list: [
-                  {title: 'Coral Red', value: '#F15B5B'},
-                  {title: 'Violet', value: '#9B5DE5'},
-                  {title: 'Hot Pink', value: '#F15BB5'},
-                  {title: 'Sunshine Yellow', value: '#FEE440'},
-                  {title: 'Sky Blue', value: '#00BBF9'},
-                  {title: 'Mint Teal', value: '#00F5D4'},
-                ],
-              },
+                      options: {
+                        list: [
+                          { title: 'Red', value: '#f07165' },
+                          { title: 'Orange', value: '#f0b665' },
+                          { title: 'Yellow', value: '#fced77' },
+                          { title: 'Green', value: '#7ad46e' },
+                          { title: 'Blue', value: '#6ecceb' },
+                          { title: 'Indigo', value: '#8679f7' },
+                          { title: 'Purple', value: '#bc79f7' },
+                           { title: 'Pink', value: '#fa89cf' },
+                        ],
+                      },
             },
           ],
         }),
@@ -145,12 +147,14 @@ export const chart = defineType({
                       type: 'string',
                       options: {
                         list: [
-                          {title: 'Coral Red', value: '#F15B5B'},
-                          {title: 'Violet', value: '#9B5DE5'},
-                          {title: 'Hot Pink', value: '#F15BB5'},
-                          {title: 'Sunshine Yellow', value: '#FEE440'},
-                          {title: 'Sky Blue', value: '#00BBF9'},
-                          {title: 'Mint Teal', value: '#00F5D4'},
+                          { title: 'Red', value: '#f07165' },
+                          { title: 'Orange', value: '#f0b665' },
+                          { title: 'Yellow', value: '#fced77' },
+                          { title: 'Green', value: '#7ad46e' },
+                          { title: 'Blue', value: '#6ecceb' },
+                          { title: 'Indigo', value: '#8679f7' },
+                          { title: 'Purple', value: '#bc79f7' },
+                           { title: 'Pink', value: '#fa89cf' },
                         ],
                       },
                     },
@@ -180,12 +184,14 @@ export const chart = defineType({
               type: 'string',
               options: {
                 list: [
-                  {title: 'Coral Red', value: '#F15B5B'},
-                  {title: 'Violet', value: '#9B5DE5'},
-                  {title: 'Hot Pink', value: '#F15BB5'},
-                  {title: 'Sunshine Yellow', value: '#FEE440'},
-                  {title: 'Sky Blue', value: '#00BBF9'},
-                  {title: 'Mint Teal', value: '#00F5D4'},
+                  { title: 'Red', value: '#f07165' },
+                  { title: 'Orange', value: '#f0b665' },
+                  { title: 'Yellow', value: '#fced77' },
+                  { title: 'Green', value: '#7ad46e' },
+                  { title: 'Blue', value: '#6ecceb' },
+                  { title: 'Indigo', value: '#8679f7' },
+                  { title: 'Purple', value: '#bc79f7' },
+                         { title: 'Pink', value: '#fa89cf' },
                 ],
               },
             },
@@ -226,12 +232,14 @@ export const chart = defineType({
               type: 'string',
               options: {
                 list: [
-                  {title: 'Coral Red', value: '#F15B5B'},
-                  {title: 'Violet', value: '#9B5DE5'},
-                  {title: 'Hot Pink', value: '#F15BB5'},
-                  {title: 'Sunshine Yellow', value: '#FEE440'},
-                  {title: 'Sky Blue', value: '#00BBF9'},
-                  {title: 'Mint Teal', value: '#00F5D4'},
+                  { title: 'Red', value: '#f07165' },
+                  { title: 'Orange', value: '#f0b665' },
+                  { title: 'Yellow', value: '#fced77' },
+                  { title: 'Green', value: '#7ad46e' },
+                  { title: 'Blue', value: '#6ecceb' },
+                  { title: 'Indigo', value: '#8679f7' },
+                  { title: 'Purple', value: '#bc79f7' },
+                         { title: 'Pink', value: '#fa89cf' },
                 ],
               },
             },
@@ -239,6 +247,15 @@ export const chart = defineType({
         }),
       ],
     }),
+    // Show legend toggle (kept last so it appears at the bottom of the editor panel)
+    defineField({
+      name: 'showLegend',
+      title: 'Show Legend',
+      type: 'boolean',
+      description: 'Toggle whether the chart legend is displayed.',
+      initialValue: true,
+    }),
+    
   ],
   preview: {
     select: {
@@ -272,4 +289,5 @@ export const barChart = {
   ...chart,
   name: 'barChart',
   title: 'Chart',
+  hidden: true,
 } as any

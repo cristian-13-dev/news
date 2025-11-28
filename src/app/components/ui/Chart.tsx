@@ -7,7 +7,7 @@ const COLORS = [
   "#f07165", // Red
   "#f0b665", // Orange
   "#fced77", // Yellow
-  "#6eeb78", // Green
+  "#7ad46e", // Green
   "#6ecceb", // Blue
   "#8679f7", // Indigo
   "#bc79f7", // Purple
@@ -117,7 +117,26 @@ export default function BarChartComponent({ value }: { value: any }) {
   const barData = (bars || []).map((b: any) => ({ label: b.label, value: toNumber(b.value), color: b.color }));
   const pieData = (slices && slices.length ? slices : barData);
   const palette = COLORS;
+  // Precompute shuffled palettes (hooks must be called unconditionally)
+  const shuffledPaletteForBars = React.useMemo(() => shuffleArray(palette), [JSON.stringify(barData.map((d: any) => d.label))]);
+  const shuffledPaletteForSeries = React.useMemo(() => shuffleArray(palette), [JSON.stringify((series || []).map((s: any) => s.label))]);
+  const shuffledPaletteForPie = React.useMemo(() => shuffleArray(palette), [JSON.stringify(pieData.map((p: any) => p.label))]);
+
+  // Helper: shuffle an array (Fisher-Yates)
+  function shuffleArray<T>(arr: T[]) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = a[i];
+      a[i] = a[j];
+      a[j] = tmp;
+    }
+    return a;
+  }
   if (effectiveType === "bar") {
+    // If none of the bars have colors, use a shuffled palette for this render
+    const needShuffle = barData.length > 0 && barData.every((d: any) => !d.color);
+    const usedPalette = needShuffle ? shuffledPaletteForBars : palette;
     if (!bars || bars.length === 0) {
       return <div style={{ color: '#EF4444', padding: 16 }}>No data for bar chart.</div>;
     }
@@ -141,15 +160,19 @@ export default function BarChartComponent({ value }: { value: any }) {
               </>
             )}
             <Tooltip />
-            {showLegend ? <Legend content={renderLegend} layout="horizontal" verticalAlign="bottom" align="center" /> : null}
             <Bar dataKey="value" radius={isHorizontal ? [0, 8, 8, 0] : [8, 8, 0, 0]}> 
               {barData.map((d: any, i: number) => (
-                <Cell key={i} fill={d.color || palette[i % palette.length]} />
+                 <Cell key={i} fill={d.color || usedPalette[i % usedPalette.length]} />
               ))}
               <LabelList dataKey="value" content={renderBarValueLabel} />
             </Bar>
           </ReBarChart>
         </ResponsiveContainer>
+          {showLegend ? (
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: 10 }}>
+              {renderLegend({ payload: barData.map((d: any, i: number) => ({ value: d.label, color: d.color || palette[i % palette.length], payload: { name: d.label, color: d.color || palette[i % palette.length] } })) })}
+            </div>
+          ) : null}
       </ChartCanvas>
     );
   }
@@ -158,6 +181,9 @@ export default function BarChartComponent({ value }: { value: any }) {
     if (!seriesArr.length) {
       return <div style={{ color: '#EF4444', padding: 16 }}>No data for line/area chart.</div>;
     }
+    // If none of the series have colors, use a shuffled palette for this render
+    const needShuffleSeries = seriesArr.length > 0 && seriesArr.every((s: any) => !s.color)
+    const usedPaletteSeries = needShuffleSeries ? shuffledPaletteForSeries : palette
     const labels = Array.from(new Set(seriesArr.flatMap((s: any) => (s.values || []).map((v: any) => v.label)))) as string[];
     const chartData = labels.map((label) => {
       const item: any = { label };
@@ -188,8 +214,8 @@ export default function BarChartComponent({ value }: { value: any }) {
                         name={s?.label || s?.name}
                         type={s?.curve || 'monotone'}
                         dataKey={`s${si}`}
-                        stroke={s.color || palette[si % palette.length]}
-                        dot={s?.showDots ? { r: 3, stroke: s.color || palette[si % palette.length], strokeWidth: 1, fill: '#fff' } : false}
+                        stroke={s.color || usedPaletteSeries[si % usedPaletteSeries.length]}
+                        dot={s?.showDots ? { r: 3, stroke: s.color || usedPaletteSeries[si % usedPaletteSeries.length], strokeWidth: 1, fill: '#fff' } : false}
                         strokeWidth={s?.strokeWidth ?? 2}
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -206,18 +232,18 @@ export default function BarChartComponent({ value }: { value: any }) {
               <YAxis domain={[0, 'dataMax']} />
               <Tooltip />
               {showLegend ? <Legend content={renderLegend} layout="horizontal" verticalAlign="bottom" align="center" /> : null}
-              {(() => {
-                  const order = seriesArr.map((_: any, idx: number) => idx).reverse();
-                    return order.map((si: number) => {
-                  const s = seriesArr[si];
-                  return (
-                      <Area
+                {(() => {
+                    const order = seriesArr.map((_: any, idx: number) => idx).reverse();
+                      return order.map((si: number) => {
+                    const s = seriesArr[si];
+                    return (
+                        <Area
                       key={si}
                       name={s?.label || s?.name}
                       type={s?.curve || 'monotone'}
                       dataKey={`s${si}`}
-                      stroke={s.color || palette[si % palette.length]}
-                      fill={s.color || palette[si % palette.length]}
+                      stroke={s.color || usedPaletteSeries[si % usedPaletteSeries.length]}
+                      fill={s.color || usedPaletteSeries[si % usedPaletteSeries.length]}
                       fillOpacity={s?.fillOpacity ?? 0.45}
                       strokeWidth={s?.strokeWidth ?? 2}
                       strokeLinecap="round"
@@ -266,9 +292,13 @@ export default function BarChartComponent({ value }: { value: any }) {
                 stroke="#ffffff"
                 strokeWidth={1}
               >
-                {pieData.map((entry: any, i: number) => (
-                  <Cell key={entry._key || i} fill={entry.color || palette[i % palette.length]} />
-                ))}
+                {(() => {
+                  const needShufflePie = pieData.length > 0 && pieData.every((p: any) => !p.color)
+                  const usedPalettePie = needShufflePie ? shuffledPaletteForPie : palette
+                  return pieData.map((entry: any, i: number) => (
+                    <Cell key={entry._key || i} fill={entry.color || usedPalettePie[i % usedPalettePie.length]} />
+                  ))
+                })()}
                 {isDonut ? (
                   <Label
                     position="center"
