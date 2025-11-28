@@ -107,7 +107,7 @@ export const chart = defineType({
                         list: [
                           { title: 'Red', value: '#f07165' },
                           { title: 'Orange', value: '#f0b665' },
-                          { title: 'Yellow', value: '#fced77' },
+                          { title: 'Yellow', value: '#ffde82' },
                           { title: 'Green', value: '#7ad46e' },
                           { title: 'Blue', value: '#6ecceb' },
                           { title: 'Indigo', value: '#8679f7' },
@@ -149,7 +149,7 @@ export const chart = defineType({
                         list: [
                           { title: 'Red', value: '#f07165' },
                           { title: 'Orange', value: '#f0b665' },
-                          { title: 'Yellow', value: '#fced77' },
+                          { title: 'Yellow', value: '#ffde82' },
                           { title: 'Green', value: '#7ad46e' },
                           { title: 'Blue', value: '#6ecceb' },
                           { title: 'Indigo', value: '#8679f7' },
@@ -186,7 +186,7 @@ export const chart = defineType({
                 list: [
                   { title: 'Red', value: '#f07165' },
                   { title: 'Orange', value: '#f0b665' },
-                  { title: 'Yellow', value: '#fced77' },
+                  { title: 'Yellow', value: '#ffde82' },
                   { title: 'Green', value: '#7ad46e' },
                   { title: 'Blue', value: '#6ecceb' },
                   { title: 'Indigo', value: '#8679f7' },
@@ -234,7 +234,7 @@ export const chart = defineType({
                 list: [
                   { title: 'Red', value: '#f07165' },
                   { title: 'Orange', value: '#f0b665' },
-                  { title: 'Yellow', value: '#fced77' },
+                  { title: 'Yellow', value: '#ffde82' },
                   { title: 'Green', value: '#7ad46e' },
                   { title: 'Blue', value: '#6ecceb' },
                   { title: 'Indigo', value: '#8679f7' },

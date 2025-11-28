@@ -4,7 +4,7 @@ import * as React from 'react'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, LabelList, LineChart, Line, AreaChart, Area, PieChart, Pie, Legend } from 'recharts'
 
 const PALETTES: Record<string, string[]> = {
-  default: ['#f07165', '#f0b665', '#fced77', '#6eeb78', '#6ecceb', '#8679f7', '#bc79f7', '#fa89cf'],
+  default: ['#f07165', '#f0b665', '#ffde82', '#6eeb78', '#6ecceb', '#8679f7', '#bc79f7', '#fa89cf'],
   pastel: ['#A7F3D0', '#FBCFE8', '#C7D2FE', '#FDE68A', '#FECACA', '#E7E6FF'],
   vibrant: ['#FF6238', '#FFB02E', '#7BD389', '#4AA3FF', '#A36BFF', '#FF4FB2'],
   mono: ['#111827', '#374151', '#6B7280', '#9CA3AF', '#D1D5DB', '#F3F4F6'],

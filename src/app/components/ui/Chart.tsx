@@ -6,7 +6,7 @@ import { BarChart as ReBarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer
 const COLORS = [
   "#f07165", // Red
   "#f0b665", // Orange
-  "#fced77", // Yellow
+  "#ffde82", // Yellow
   "#7ad46e", // Green
   "#6ecceb", // Blue
   "#8679f7", // Indigo
