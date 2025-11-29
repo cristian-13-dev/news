@@ -2,14 +2,17 @@ import { sanityFetch } from '@/lib/sanity'
 import { POSTS_QUERY } from '@/lib/queries'
 import { PostCard } from '@/app/components/ui/PostCard'
 import type { PostListItem } from '@/types/sanity'
+import { title } from 'process'
 
 // Revalidate every 60 seconds (ISR)
 export const revalidate = 60
 
+export const metadata = {title: 'Posts'}
+
 export default async function PostsPage() {
   const { data: posts } = await sanityFetch({
     query: POSTS_QUERY,
-    tags: ['post'], // Cache tag for revalidation
+    tags: ['post'], 
   }) as { data: PostListItem[] }
 
   return (

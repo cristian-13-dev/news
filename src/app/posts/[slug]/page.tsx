@@ -10,12 +10,8 @@ import { AuthorInfo } from "@/app/components/ui/AuthorInfo";
 import { PostImage } from "@/app/components/ui/PostImage";
 import type { Post } from "@/types/sanity";
 import type { Metadata, ResolvingMetadata } from "next";
+import { SITE_URL } from "@/lib/website";
 
-type Props = {
-  params: { slug: string };
-};
-
-// Revalidate every 60 seconds (ISR)
 export const revalidate = 60;
 
 async function fetchPost(slug: string): Promise<Post | null> {
@@ -41,14 +37,16 @@ async function fetchPostMeta(slug: string) {
 }
 
 export async function generateMetadata(
-  { params }: { params: { slug: string } },
-  parent?: ResolvingMetadata
+  { params }: { params: Promise<{ slug: string }> },
+  parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const { slug } = params;
+  const { slug } = await params;
 
   const meta = await fetchPostMeta(slug);
 
   if (!meta) return { title: "Post" };
+
+  const url = `${SITE_URL}/posts/${slug}`;
 
   return {
     title: meta.title,
@@ -59,6 +57,7 @@ export async function generateMetadata(
       type: "article",
       publishedTime: meta.publishedAt,
       authors: meta.authorName ? [meta.authorName] : undefined,
+      url,
       images: meta.imageUrl
         ? [{ url: meta.imageUrl, alt: meta.title }]
         : undefined,
@@ -72,8 +71,9 @@ export async function generateStaticParams() {
   return posts.map((post) => ({ slug: post.slug }));
 }
 
-export default async function PostPage({ params }: Props) {
-  const { slug } = params;
+export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = await params;
+  const { slug } = resolvedParams;
 
   const post = await fetchPost(slug);
 
