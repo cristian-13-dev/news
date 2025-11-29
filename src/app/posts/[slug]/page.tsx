@@ -37,29 +37,31 @@ async function fetchPostMeta(slug: string) {
 }
 
 export async function generateMetadata(
-  { params }: { params: Promise<{ slug: string }> },
+  { params }: { params: Promise<{ slug: string; description?: string }> },
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const { slug } = await params;
+  const resolvedParams = (await params) as { slug: string; description?: string };
+  const { slug, description } = resolvedParams;
 
-  const meta = await fetchPostMeta(slug);
+  // Use the precomputed description from generateStaticParams when available
+  const meta = description ? { title: undefined, description } : await fetchPostMeta(slug);
 
   if (!meta) return { title: "Post" };
 
   const url = `${SITE_URL}/posts/${slug}`;
 
   return {
-    title: meta.title,
-    description: meta.description || undefined,
+    title: (meta as any).title || undefined,
+    description: (meta as any).description || undefined,
     openGraph: {
-      title: meta.title,
-      description: meta.description || undefined,
+      title: (meta as any).title || undefined,
+      description: (meta as any).description || undefined,
       type: "article",
-      publishedTime: meta.publishedAt,
-      authors: meta.authorName ? [meta.authorName] : undefined,
+      publishedTime: (meta as any).publishedAt,
+      authors: (meta as any).authorName ? [(meta as any).authorName] : undefined,
       url,
-      images: meta.imageUrl
-        ? [{ url: meta.imageUrl, alt: meta.title }]
+      images: (meta as any).imageUrl
+        ? [{ url: (meta as any).imageUrl, alt: (meta as any).title }]
         : undefined,
     },
   };
@@ -67,13 +69,16 @@ export async function generateMetadata(
 
 // Generate static params for all posts
 export async function generateStaticParams() {
-  const posts = await client.fetch<Array<{ slug: string }>>(POST_SLUGS_QUERY);
-  return posts.map((post) => ({ slug: post.slug }));
+  const posts = await client.fetch<Array<{ slug: string; description?: string }>>(
+    `*[_type == "post"]{ "slug": slug.current, "description": coalesce(excerpt, pt::text(body)[0..150]) }`
+  );
+
+  return posts.map((post) => ({ slug: post.slug, description: post.description }));
 }
 
-export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function PostPage({ params }: { params: Promise<{ slug: string; description?: string }> }) {
   const resolvedParams = await params;
-  const { slug } = resolvedParams;
+  const { slug } = resolvedParams as { slug: string; description?: string };
 
   const post = await fetchPost(slug);
 
@@ -83,10 +88,6 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
 
   return (
     <article className="min-h-screen bg-gray-50">
-      <PageHeader>
-        <BackButton href="/posts" label="All Posts" />
-      </PageHeader>
-
       <main className="max-w-4xl mx-auto px-6 py-12">
         {post?.categories && <CategoryBadges categories={post.categories} />}
 

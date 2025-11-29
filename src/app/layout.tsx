@@ -2,6 +2,7 @@ import React, {ReactNode} from "react";
 import type {Metadata} from "next";
 import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
+import ConditionalNavigation from "./components/ui/ConditionalNavigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +28,7 @@ export default function RootLayout({children}: Readonly<{
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-slate-900`}
     >
+      <ConditionalNavigation />
     {children}
     </body>
     </html>

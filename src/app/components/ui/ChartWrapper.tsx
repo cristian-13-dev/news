@@ -58,15 +58,14 @@ export default function ChartWrapper({ value }: ChartWrapperProps) {
     if (Array.isArray(value.slices)) {
       return { type: 'slices', data: value.slices };
     }
-    // Support direct { type: 'bars', data: [...] } debug/test input
+
     if (value && value.type === 'bars' && Array.isArray(value.data)) {
       return {
         type: 'bars',
         data: value.data,
       };
     }
-    // If nothing matched, return unknown but include the incoming shape so
-    // it's easier to debug in the Studio / browser console.
+
     return { type: 'unknown', data: value };
   }, [value]);
 

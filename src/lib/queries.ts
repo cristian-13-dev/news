@@ -13,7 +13,9 @@ export const POST_FIELDS = `
     title
   },
   publishedAt,
-  body
+  body,
+  "excerpt": coalesce(excerpt, pt::text(body)[0..200]),
+  "imageUrl": mainImage.asset->url
 `
 
 // Query to fetch all posts
