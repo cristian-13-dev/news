@@ -1,6 +1,3 @@
-/**
- * Format a date string to a readable format
- */
 export function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -9,18 +6,12 @@ export function formatDate(dateString: string): string {
   })
 }
 
-/**
- * Get reading time estimate based on content
- */
 export function getReadingTime(text: string): number {
   const wordsPerMinute = 200
   const words = text.trim().split(/\s+/).length
   return Math.ceil(words / wordsPerMinute)
 }
 
-/**
- * Truncate text to a specified length
- */
 export function truncate(text: string, length: number): string {
   if (text.length <= length) return text
   return text.slice(0, length).trim() + '...'

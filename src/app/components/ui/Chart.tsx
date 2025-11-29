@@ -304,7 +304,7 @@ export default function BarChartComponent({ value }: { value: any }) {
       return <div style={{ color: '#EF4444', padding: 16 }}>No data for pie/donut chart.</div>;
     }
     const isDonut = effectiveType === "donut";
-    // Adjust pie/donut canvas size: make larger for readability
+
     const pieHeight = isMobile ? 360 : 520;
     const outerRadius = isMobile ? 140 : 200;
     const innerRadius = isDonut ? (isMobile ? 84 : 110) : 0;
@@ -317,7 +317,7 @@ export default function BarChartComponent({ value }: { value: any }) {
           <ResponsiveContainer width="100%" height={pieHeight}>
             <PieChart margin={{ top: 8, right: 0, bottom: 0, left: 0 }}>
               <Tooltip />
-              {/* Render native Legend only on desktop; on mobile render the HTML legend below the chart to avoid built-in extra padding */}
+
               {!isMobile && showLegend ? <Legend content={renderLegend} layout="horizontal" verticalAlign="bottom" align="center" /> : null}
               <Pie
                 data={pieData as any}
