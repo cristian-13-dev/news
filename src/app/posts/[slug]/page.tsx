@@ -12,20 +12,23 @@ import type { Post } from "@/types/sanity";
 import type { Metadata, ResolvingMetadata } from "next";
 
 type Props = {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  params: { slug: string };
 };
 
 // Revalidate every 60 seconds (ISR)
 export const revalidate = 60;
 
-export async function generateMetadata(
-  { params }: { params: { slug: string } },
-  parent?: ResolvingMetadata
-): Promise<Metadata> {
-  const { slug } = params;
+async function fetchPost(slug: string): Promise<Post | null> {
+  const res = (await sanityFetch({
+    query: POST_BY_SLUG_QUERY,
+    params: { slug },
+    tags: ["post", `post:${slug}`],
+  })) as { data: Post | null };
+  return res?.data ?? null;
+}
 
-  const meta = await client.fetch(
+async function fetchPostMeta(slug: string) {
+  return client.fetch(
     `*[_type == "post" && slug.current == $slug][0]{
       title,
       "description": coalesce(excerpt, pt::text(body)[0..150]),
@@ -35,6 +38,15 @@ export async function generateMetadata(
     }`,
     { slug }
   );
+}
+
+export async function generateMetadata(
+  { params }: { params: { slug: string } },
+  parent?: ResolvingMetadata
+): Promise<Metadata> {
+  const { slug } = params;
+
+  const meta = await fetchPostMeta(slug);
 
   if (!meta) return { title: "Post" };
 
@@ -60,18 +72,10 @@ export async function generateStaticParams() {
   return posts.map((post) => ({ slug: post.slug }));
 }
 
-export default async function PostPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default async function PostPage({ params }: Props) {
   const { slug } = params;
 
-  const { data: post } = (await sanityFetch({
-    query: POST_BY_SLUG_QUERY,
-    params: { slug },
-    tags: ["post", `post:${slug}`],
-  })) as { data: Post | null };
+  const post = await fetchPost(slug);
 
   if (!post) {
     notFound();
@@ -84,25 +88,25 @@ export default async function PostPage({
       </PageHeader>
 
       <main className="max-w-4xl mx-auto px-6 py-12">
-        {post.categories && <CategoryBadges categories={post.categories} />}
+        {post?.categories && <CategoryBadges categories={post.categories} />}
 
         <h1 className="text-4xl sm:text-5xl font-bold mb-6 mt-6 leading-tight text-gray-900">
-          {post.title}
+          {post?.title}
         </h1>
 
         <div className="mb-10 pb-8 border-b border-gray-200">
-          {post.author && (
+          {post?.author && (
             <AuthorInfo author={post.author} publishedAt={post.publishedAt} />
           )}
         </div>
 
-        {post.mainImage && (
+        {post?.mainImage && (
           <div className="mb-10">
             <PostImage image={post.mainImage} title={post.title} priority />
           </div>
         )}
 
-        {post.body && (
+        {post?.body && (
           <div className="prose prose-lg prose-gray max-w-none">
             <PortableText value={post.body} components={components} />
           </div>
