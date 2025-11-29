@@ -15,6 +15,7 @@ export function PostImage({ image, title, priority = false }: PostImageProps) {
         src={urlFor(image).width(1200).height(675).url()}
         alt={image.alt || title}
         fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 800px, 1200px"
         className="object-cover"
         priority={priority}
       />

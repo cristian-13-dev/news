@@ -65,6 +65,7 @@ export function ProsCons({ value }: ProsConsProps) {
                     src={urlFor(item.image).width(200).height(200).url()}
                     alt={item.image.alt || item.name}
                     fill
+                    sizes="96px"
                     className="object-contain"
                   />
                 </div>

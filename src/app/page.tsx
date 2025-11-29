@@ -36,10 +36,10 @@ export default async function Home() {
     <main className="max-w-4xl mx-auto px-6 py-12">
       <header className="mb-8">
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-          Latest Articles
+          Latest Papers
         </h1>
         <p className="mt-2 text-sm text-black/70">
-          Thoughtful, long-form writing on software, design and the web.
+          Data-driven research and analysis that highlight what truly matters.
         </p>
       </header>
 
@@ -76,7 +76,7 @@ export default async function Home() {
 
                 <Link
                   href={`/posts/${slug}`}
-                  className="text-xl md:text-2xl font-bold text-black hover:text-sky-600 inline-flex items-center"
+                  className="text-xl md:text-2xl font-bold text-black hover:text-neutral-700 inline-flex items-center"
                 >
                   <span className="">
                     {isWithinDays(post.publishedAt, 3) && (

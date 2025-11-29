@@ -58,6 +58,7 @@ export function Comparison({ value }: ComparisonProps) {
                         src={urlFor(item.image).width(256).height(256).url()}
                         alt={item.image.alt || item.name}
                         fill
+                        sizes="80px"
                         className="object-contain"
                       />
                     </div>
@@ -109,6 +110,7 @@ export function Comparison({ value }: ComparisonProps) {
                     src={urlFor(item.image).width(256).height(256).url()}
                     alt={item.image.alt || item.name}
                     fill
+                    sizes="(max-width: 768px) 128px, 80px"
                     className="object-contain"
                   />
                 </div>

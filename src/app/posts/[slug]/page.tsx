@@ -43,7 +43,6 @@ export async function generateMetadata(
   const resolvedParams = (await params) as { slug: string; description?: string };
   const { slug, description } = resolvedParams;
 
-  // Use the precomputed description from generateStaticParams when available
   const meta = description ? { title: undefined, description } : await fetchPostMeta(slug);
 
   if (!meta) return { title: "Post" };
@@ -67,7 +66,6 @@ export async function generateMetadata(
   };
 }
 
-// Generate static params for all posts
 export async function generateStaticParams() {
   const posts = await client.fetch<Array<{ slug: string; description?: string }>>(
     `*[_type == "post"]{ "slug": slug.current, "description": coalesce(excerpt, pt::text(body)[0..150]) }`

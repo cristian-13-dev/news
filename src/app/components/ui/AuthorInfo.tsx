@@ -17,6 +17,7 @@ export function AuthorInfo({ author, publishedAt }: AuthorInfoProps) {
             src={urlFor(author.image).width(80).height(80).url()}
             alt={author.name}
             fill
+            sizes="40px"
             className="object-cover"
           />
         </div>
