@@ -34,18 +34,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: e?.message ?? 'Server env not configured' }, { status: 500 })
   }
 
-  // Upsert/create using the `post_slug` column (matches your DB schema)
   const slugString = slug ? (typeof slug === 'string' ? slug : slug.current) : null
   if (!slugString) {
     return NextResponse.json({ ok: false, error: 'Missing slug in payload' }, { status: 400 })
   }
 
-  // Insert a row with post_slug and default likes = 0.
-  // If you want upsert (no duplicates), add a UNIQUE constraint on post_slug in DB.
+
   const { data, error } = await supabaseAdmin.from('likes').insert({ post_slug: slugString, likes: 0 }).select().maybeSingle()
 
   if (error) {
-    console.error('supabase insert error', error)
     return NextResponse.json({ ok: false, error: (error && (error as any).message) || String(error) }, { status: 500 })
   }
 

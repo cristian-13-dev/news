@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/utils/Supabase/supabase-admin'
 import { hasIpLiked, addIpLike, removeIpLike } from '@/utils/Supabase/likes'
+import { getWithCache } from '@/lib/likesCache'
 
 function getIpFromRequest(req: Request) {
   // prefer forwarded header (Vercel/Proxies)
@@ -34,7 +35,6 @@ export async function POST(req: Request) {
       .maybeSingle()
 
     if (selectError) {
-      console.error('supabase select error', selectError)
       return NextResponse.json({ ok: false, error: selectError.message }, { status: 500 })
     }
 
@@ -48,7 +48,6 @@ export async function POST(req: Request) {
           return NextResponse.json({ ok: false, error: 'You already liked this post' }, { status: 409 })
         }
       } catch (e: any) {
-        console.error('ip check error', e)
       }
     }
 
@@ -61,7 +60,6 @@ export async function POST(req: Request) {
         .eq('post_slug', slug)
 
       if (updateError) {
-        console.error('supabase update error', updateError)
         return NextResponse.json({ ok: false, error: updateError.message }, { status: 500 })
       }
 
@@ -70,7 +68,6 @@ export async function POST(req: Request) {
         if (action === 'decrement' && ip) await removeIpLike(slug, ip)
         if (action !== 'decrement' && ip) await addIpLike(slug, ip)
       } catch (e) {
-        console.error('ip table maintenance error', e)
       }
 
       return NextResponse.json({ ok: true, likes: newLikes })
@@ -85,17 +82,49 @@ export async function POST(req: Request) {
       .maybeSingle()
 
     if (insertError) {
-      console.error('supabase insert error', insertError)
       return NextResponse.json({ ok: false, error: insertError.message }, { status: 500 })
     }
 
     try {
       if (action !== 'decrement' && ip) await addIpLike(slug, ip)
     } catch (e) {
-      console.error('ip insert error', e)
     }
 
     return NextResponse.json({ ok: true, likes: inserted?.likes ?? insert.likes, row: inserted ?? insert })
+  } catch (err: any) {
+    return NextResponse.json({ ok: false, error: err?.message ?? String(err) }, { status: 500 })
+  }
+}
+
+export async function GET(req: Request) {
+  const url = new URL(req.url)
+  const slug = url.searchParams.get('slug')
+
+  if (!slug) {
+    return NextResponse.json({ ok: false, error: 'Missing slug' }, { status: 400 })
+  }
+
+  let supabase
+  try {
+    supabase = getSupabaseAdmin()
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e?.message ?? 'Server env not configured' }, { status: 500 })
+  }
+
+  try {
+    const fetcher = async (): Promise<number> => {
+      const { data, error } = await supabase
+        .from('likes')
+        .select('likes')
+        .eq('post_slug', slug)
+        .maybeSingle()
+
+      if (error) throw error
+      return data?.likes ?? 0
+    }
+    const likes = await getWithCache(slug, fetcher)
+
+    return NextResponse.json({ ok: true, likes })
   } catch (err: any) {
     return NextResponse.json({ ok: false, error: err?.message ?? String(err) }, { status: 500 })
   }

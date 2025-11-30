@@ -55,8 +55,7 @@ export default function LikeButton({ slug, initialCount = 0 }: Props) {
         localStorage.setItem(`likes_${slug}`, String(nextCount));
         setCount(nextCount);
         setLiked(true);
-        // show a temporary red ring to give feedback, then hide after 1.5s
-        setShowBorder(true);
+         setShowBorder(true);
         if (timerRef.current) clearTimeout(timerRef.current);
         timerRef.current = window.setTimeout(() => {
           setShowBorder(false);
@@ -66,7 +65,7 @@ export default function LikeButton({ slug, initialCount = 0 }: Props) {
     } catch (e) {
     }
 
-    // Fire-and-forget server update to persist likes (use postId as the key)
+    
     try {
       const resp = await fetch('/api/likes', {
         method: 'POST',
@@ -78,9 +77,10 @@ export default function LikeButton({ slug, initialCount = 0 }: Props) {
         setCount(json.likes)
       }
     } catch (e) {
-      console.error('Failed to persist like', e)
     }
   };
+
+  
 
   useEffect(() => {
     return () => {
@@ -91,11 +91,12 @@ export default function LikeButton({ slug, initialCount = 0 }: Props) {
   }, []);
 
   return (
-    <button
-      onClick={toggle}
+    <div className="inline-flex items-center gap-2">
+      <button
+        onClick={toggle}
       aria-pressed={liked}
       aria-label={liked ? "Unlike post" : "Like post"}
-      className={`inline-flex items-center gap-2 text-sm font-medium transition-all duration-150 focus:outline-none rounded-full px-2 py-1 ${
+      className={`inline-flex items-center text-sm font-medium transition-all duration-150 focus:outline-none rounded-full px-2 py-1 ${
         liked ? "text-rose-600" : "text-black/60"
       } ${showBorder ? "ring-2 ring-rose-300 ring-offset-1" : ""}`}
     >
@@ -108,5 +109,7 @@ export default function LikeButton({ slug, initialCount = 0 }: Props) {
       </span>
       <span className="text-xs tabular-nums">{count}</span>
     </button>
+      
+    </div>
   );
 }

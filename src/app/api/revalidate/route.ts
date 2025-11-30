@@ -21,26 +21,26 @@ export async function POST(req: NextRequest) {
     const slug = body?.slug?.current || body?.slug;
     const docType = body?._type;
     
-    console.log('[Revalidate] Webhook received:', { slug, docType });
+    // webhook received: { slug, docType }
 
     // Revalidate specific paths
     if (slug && docType === 'post') {
       revalidatePath(`/posts/${slug}`);
-      console.log(`[Revalidate] Path: /posts/${slug}`);
+      // revalidate path /posts/${slug}
     }
 
     // Revalidate posts listing
     revalidatePath('/posts');
-    console.log('[Revalidate] Path: /posts');
+    // revalidate path: /posts
 
     // Revalidate home page
     revalidatePath('/');
-    console.log('[Revalidate] Path: /');
+    // revalidate path: /
 
     // Revalidate by tag (if using tagged cache)
     if (docType) {
       revalidateTag(docType);
-      console.log(`[Revalidate] Tag: ${docType}`);
+      // revalidate tag: ${docType}
     }
 
     return NextResponse.json({ 
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('[Revalidate] Error:', error);
+    // revalidate error
     return NextResponse.json(
       { ok: false, error: String(error) }, 
       { status: 500 }
