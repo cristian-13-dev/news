@@ -85,7 +85,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   }
 
   return (
-    <article className="min-h-screen bg-gray-50">
+    <article className="min-h-screen">
       <main className="max-w-4xl mx-auto px-6 py-12">
         {post?.categories && <CategoryBadges categories={post.categories} />}
 
