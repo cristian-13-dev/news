@@ -26,11 +26,21 @@ export default function RootLayout({children}: Readonly<{
     <html suppressHydrationWarning lang="en" className="min-h-screen h-full">
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-slate-900 min-h-screen h-full flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-slate-900 min-h-screen flex flex-col`}
       >
         <ConditionalNavigation />
         <div className="flex-1 min-h-0">
-          {children}
+          <div className="flex flex-col xl:flex-row gap-8 items-stretch mx-auto max-w-[1400px] w-full h-full overflow-auto hide-scrollbar">
+            <div className="flex-1 min-h-0">
+              {children}
+            </div>
+            <aside className="hidden xl:block border-l border-gray-200 bg-white p-6 self-stretch sticky top-0 h-[calc(100vh-50px)] overflow-auto">
+              <div className="flex flex-col gap-4">
+                <h2 className="text-lg font-semibold text-black mb-2">Staff Picks</h2>
+                <p className="text-sm text-black/70">Place widgets, links, or additional information here.</p>
+              </div>
+            </aside>
+          </div>
         </div>
       </body>
     </html>
