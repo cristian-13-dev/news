@@ -108,9 +108,7 @@ export default async function MainPage() {
                     </div>
 
                     <div className="text-xs text-black/60 flex items-center gap-2">
-                      <div>{formatDate(post.publishedAt)}</div>
-                      <span>•</span>
-                      <div>{readingTime(rawText)}</div>
+                      <p>{readingTime(rawText)}</p>
                     </div>
                   </div>
 
