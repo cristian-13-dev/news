@@ -23,14 +23,16 @@ export default function RootLayout({children}: Readonly<{
   children: ReactNode;
 }>) {
   return (
-    <html suppressHydrationWarning lang="en">
-    <body
-      suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-slate-900`}
-    >
-      <ConditionalNavigation />
-    {children}
-    </body>
+    <html suppressHydrationWarning lang="en" className="min-h-screen h-full">
+      <body
+        suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-slate-900 min-h-screen h-full flex flex-col`}
+      >
+        <ConditionalNavigation />
+        <div className="flex-1 min-h-0">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }

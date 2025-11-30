@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+@layer base {
+	html, body, #__next {
+		@apply h-full min-h-screen;
+	}
+
+	/* Ensure direct children can shrink/grow correctly inside flex containers */
+	main, #__next > div {
+		@apply min-h-0;
+	}
+}
