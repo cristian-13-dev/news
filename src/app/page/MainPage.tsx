@@ -8,6 +8,7 @@ import {
   isWithinDays,
 } from "@/lib/utils";
 import LikeButton from "@/components/ui/LikeButton";
+import { getLikesBySlugs } from '@/utils/Supabase/likes'
 
 type PostPreview = {
   _id: string;
@@ -26,6 +27,9 @@ export default async function MainPage() {
   const getSlug = (s: PostPreview["slug"]) =>
     typeof s === "string" ? s : s?.current ?? "";
 
+  // gather slugs and fetch likes from Supabase
+  const slugs = posts.map((p) => getSlug(p.slug)).filter(Boolean)
+  const likesMap = await getLikesBySlugs(slugs)
   return (
     <main className="max-w-4xl mx-auto px-6 py-6">
       <header className="mb-4">
@@ -113,7 +117,7 @@ export default async function MainPage() {
                   </div>
 
                   <div>
-                    <LikeButton slug={getSlug(post.slug)} initialCount={0} />
+                    <LikeButton slug={getSlug(post.slug)} initialCount={likesMap[getSlug(post.slug)] ?? 0} />
                   </div>
                 </div>
               </div>

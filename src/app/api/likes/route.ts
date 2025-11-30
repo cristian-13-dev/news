@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/utils/Supabase/supabase-admin'
+import { hasIpLiked, addIpLike, removeIpLike } from '@/utils/Supabase/likes'
+
+function getIpFromRequest(req: Request) {
+  // prefer forwarded header (Vercel/Proxies)
+  const xf = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip')
+  if (xf) return xf.split(',')[0].trim()
+  // fallback to connection remote address not available in Next.js Request; return empty
+  return ''
+}
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({} as any))
@@ -29,6 +38,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: selectError.message }, { status: 500 })
     }
 
+    const ip = getIpFromRequest(req)
+
+    // If action is increment we must enforce one-like-per-ip
+    if (action !== 'decrement') {
+      try {
+        const already = ip ? await hasIpLiked(slug, ip) : false
+        if (already) {
+          return NextResponse.json({ ok: false, error: 'You already liked this post' }, { status: 409 })
+        }
+      } catch (e: any) {
+        console.error('ip check error', e)
+      }
+    }
+
     if (existing) {
       const delta = action === 'decrement' ? -1 : 1
       const newLikes = Math.max(0, (existing.likes ?? 0) + delta)
@@ -40,6 +63,14 @@ export async function POST(req: Request) {
       if (updateError) {
         console.error('supabase update error', updateError)
         return NextResponse.json({ ok: false, error: updateError.message }, { status: 500 })
+      }
+
+      // maintain ips table
+      try {
+        if (action === 'decrement' && ip) await removeIpLike(slug, ip)
+        if (action !== 'decrement' && ip) await addIpLike(slug, ip)
+      } catch (e) {
+        console.error('ip table maintenance error', e)
       }
 
       return NextResponse.json({ ok: true, likes: newLikes })
@@ -56,6 +87,12 @@ export async function POST(req: Request) {
     if (insertError) {
       console.error('supabase insert error', insertError)
       return NextResponse.json({ ok: false, error: insertError.message }, { status: 500 })
+    }
+
+    try {
+      if (action !== 'decrement' && ip) await addIpLike(slug, ip)
+    } catch (e) {
+      console.error('ip insert error', e)
     }
 
     return NextResponse.json({ ok: true, likes: inserted?.likes ?? insert.likes, row: inserted ?? insert })
