@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   }
 
   const { error } = await supabaseAdmin
-    .from('Likes')
+    .from('likes')
     .upsert({ slug, likes: 0 }, { onConflict: 'slug' })
 
   if (error) {
