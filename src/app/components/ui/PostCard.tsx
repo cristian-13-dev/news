@@ -10,10 +10,11 @@ interface PostCardProps {
 }
 
 export function PostCard({ post }: PostCardProps) {
+  const redirectUrl = `/articles/${post.slug.current}`
   return (
     <article className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white">
       {post.mainImage && (
-        <Link href={`/posts/${post.slug.current}`}>
+        <Link href={redirectUrl}>
           <div className="relative w-full h-48">
             <Image
               src={urlFor(post.mainImage).width(600).height(400).url()}
@@ -27,7 +28,7 @@ export function PostCard({ post }: PostCardProps) {
       )}
       
       <div className="p-4">
-        <Link href={`/posts/${post.slug.current}`}>
+        <Link href={redirectUrl}>
           <h2 className="text-2xl font-semibold mb-2 hover:text-blue-600 transition-colors">
             {post.title}
           </h2>

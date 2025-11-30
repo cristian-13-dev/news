@@ -7,7 +7,7 @@ export type NavLink = { href: string; label: string };
 
 const DEFAULT_LINKS: NavLink[] = [
   { href: "/", label: "Home" },
-  { href: "/posts", label: "Posts" },
+  { href: "/articles", label: "Articles" },
   { href: "/categories", label: "Categories" },
   { href: "/about", label: "About" },
 ];

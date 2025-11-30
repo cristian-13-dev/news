@@ -7,9 +7,9 @@ import { title } from 'process'
 // Revalidate every 60 seconds (ISR)
 export const revalidate = 60
 
-export const metadata = {title: 'Posts'}
+export const metadata = {title: 'Articles'}
 
-export default async function PostsPage() {
+export default async function ArticlesPage() {
   const { data: posts } = await sanityFetch({
     query: POSTS_QUERY,
     tags: ['post'], 
