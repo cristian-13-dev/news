@@ -122,6 +122,21 @@ export const components: PortableTextComponents = {
       if (!value) return null;
       return <ChartWrapper value={value} />;
     },
+    timeline: ({ value }) => {
+      if (!value) return null;
+      const items = Array.isArray(value.items) ? value.items : value.entries || value;
+      return (
+        <div className="my-8">
+          {Array.isArray(items) && items.map((it: any, idx: number) => (
+            <div key={idx} className="mb-4">
+              {it.date && <div className="text-sm text-gray-500">{it.date}</div>}
+              {it.title && <div className="font-semibold text-gray-900">{it.title}</div>}
+              {it.description && <div className="text-gray-800">{it.description}</div>}
+            </div>
+          ))}
+        </div>
+      )
+    },
     // Backwards-compatible legacy block type `barChart`
     barChart: ({ value }) => {
       if (!value) return null;

@@ -112,7 +112,7 @@ export default async function MainPage() {
                     </div>
 
                     <div className="text-xs text-black/60 flex items-center gap-2">
-                      <p>{readingTime(rawText)}</p>
+                      <p>{readingTime(post.body)}</p>
                     </div>
                   </div>
 

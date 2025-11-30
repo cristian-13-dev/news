@@ -45,11 +45,10 @@ export function plainTextFromPortableText(body: any): string {
 }
 
 // Convenience wrapper that returns a human readable string like "3 min read"
-export function readingTime(text?: string | any): string {
-  if (!text) return "1 min read";
-  const str = typeof text === "string" ? text : JSON.stringify(text);
-  const minutes = Math.max(1, Math.round(str.split(/\s+/).filter(Boolean).length / 200));
-  return `${minutes} min read`;
+import { readingTime as readingTimeFromTextUtils } from './textUtils'
+
+export function readingTime(text?: string | any, opts?: { charts?: number; tables?: number; images?: number; codeBlocks?: number; wordsPerMinute?: number }): string {
+  return readingTimeFromTextUtils(text, opts)
 }
 
 export function estimateCharLimit(containerPx: number, avgCharPx = 7.0, lines = 3) {
