@@ -4,11 +4,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { Heart } from "lucide-react";
 
 type Props = {
-  postId: string;
+  slug: string;
   initialCount?: number;
 };
 
-export default function LikeButton({ postId, initialCount = 0 }: Props) {
+export default function LikeButton({ slug, initialCount = 0 }: Props) {
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState<number>(initialCount);
   const [showBorder, setShowBorder] = useState(false);
@@ -18,18 +18,18 @@ export default function LikeButton({ postId, initialCount = 0 }: Props) {
     try {
       const stored = localStorage.getItem("liked_posts");
       const likedPosts: string[] = stored ? JSON.parse(stored) : [];
-      setLiked(likedPosts.includes(postId));
+      setLiked(likedPosts.includes(slug));
 
-      const storedCount = localStorage.getItem(`likes_${postId}`);
+      const storedCount = localStorage.getItem(`likes_${slug}`);
       if (storedCount) {
         setCount(Number(storedCount));
       } else {
-        localStorage.setItem(`likes_${postId}`, String(initialCount));
+        localStorage.setItem(`likes_${slug}`, String(initialCount));
         setCount(initialCount);
       }
     } catch (e) {
     }
-  }, [postId, initialCount]);
+  }, [slug, initialCount]);
 
   const toggle = async () => {
     try {
@@ -37,10 +37,10 @@ export default function LikeButton({ postId, initialCount = 0 }: Props) {
       const likedPosts: string[] = stored ? JSON.parse(stored) : [];
 
       if (liked) {
-        const next = likedPosts.filter((id) => id !== postId);
+        const next = likedPosts.filter((id) => id !== slug);
         localStorage.setItem("liked_posts", JSON.stringify(next));
         const nextCount = Math.max(0, count - 1);
-        localStorage.setItem(`likes_${postId}`, String(nextCount));
+        localStorage.setItem(`likes_${slug}`, String(nextCount));
         setCount(nextCount);
         setLiked(false);
         if (timerRef.current) {
@@ -49,10 +49,10 @@ export default function LikeButton({ postId, initialCount = 0 }: Props) {
         }
         setShowBorder(false);
       } else {
-        likedPosts.push(postId);
+        likedPosts.push(slug);
         localStorage.setItem("liked_posts", JSON.stringify(likedPosts));
         const nextCount = count + 1;
-        localStorage.setItem(`likes_${postId}`, String(nextCount));
+        localStorage.setItem(`likes_${slug}`, String(nextCount));
         setCount(nextCount);
         setLiked(true);
         // show a temporary red ring to give feedback, then hide after 1.5s
@@ -71,7 +71,7 @@ export default function LikeButton({ postId, initialCount = 0 }: Props) {
       const resp = await fetch('/api/likes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId, action: liked ? 'decrement' : 'increment' }),
+        body: JSON.stringify({ slug, action: liked ? 'decrement' : 'increment' }),
       })
       const json = await resp.json()
       if (json?.ok && typeof json?.likes === 'number') {

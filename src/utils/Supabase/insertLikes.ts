@@ -34,14 +34,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: e?.message ?? 'Server env not configured' }, { status: 500 })
   }
 
-  // Prefer upserting by post id (Sanity _id). If not available, fall back to slug.
-  const upsertPayload: Record<string, any> = { likes: 0 }
-  if (postId) upsertPayload.post_id = postId
-  if (slug) upsertPayload.slug = typeof slug === 'string' ? slug : slug.current
+  // Upsert/create using the `post_slug` column (matches your DB schema)
+  const slugString = slug ? (typeof slug === 'string' ? slug : slug.current) : null
+  if (!slugString) {
+    return NextResponse.json({ ok: false, error: 'Missing slug in payload' }, { status: 400 })
+  }
 
-  const conflictCol = postId ? 'post_id' : 'slug'
+  // Insert a row with post_slug and default likes = 0.
+  // If you want upsert (no duplicates), add a UNIQUE constraint on post_slug in DB.
+  const { data, error } = await supabaseAdmin.from('likes').insert({ post_slug: slugString, likes: 0 }).select().maybeSingle()
 
-  const { error } = await supabaseAdmin.from('likes').upsert(upsertPayload, { onConflict: conflictCol })
+  if (error) {
+    console.error('supabase insert error', error)
+    return NextResponse.json({ ok: false, error: (error && (error as any).message) || String(error) }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true, row: data ?? { post_slug: slugString, likes: 0 } })
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 })

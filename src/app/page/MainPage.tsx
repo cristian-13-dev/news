@@ -113,7 +113,7 @@ export default async function MainPage() {
                   </div>
 
                   <div>
-                    <LikeButton postId={post._id} initialCount={0} />
+                    <LikeButton slug={getSlug(post.slug)} initialCount={0} />
                   </div>
                 </div>
               </div>

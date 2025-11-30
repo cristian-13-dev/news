@@ -3,10 +3,10 @@ import { getSupabaseAdmin } from '@/utils/Supabase/supabase-admin'
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({} as any))
-  const { postId, slug, action } = body
+  const { slug, action } = body
 
-  if (!postId && !slug) {
-    return NextResponse.json({ ok: false, error: 'Missing postId or slug' }, { status: 400 })
+  if (!slug) {
+    return NextResponse.json({ ok: false, error: 'Missing slug' }, { status: 400 })
   }
 
   let supabase
@@ -17,34 +17,48 @@ export async function POST(req: Request) {
   }
 
   try {
-    // Determine lookup column
-    if (postId) {
-      const { data: existing } = await supabase.from('likes').select('likes').eq('post_id', postId).maybeSingle()
-      if (existing) {
-        const delta = action === 'decrement' ? -1 : 1
-        const newLikes = Math.max(0, (existing.likes ?? 0) + delta)
-        await supabase.from('likes').update({ likes: newLikes }).eq('post_id', postId)
-        return NextResponse.json({ ok: true, likes: newLikes })
-      } else {
-        // create new row
-        const insert = { post_id: postId, slug: slug ?? null, likes: action === 'decrement' ? 0 : 1 }
-        await supabase.from('likes').insert(insert)
-        return NextResponse.json({ ok: true, likes: insert.likes })
-      }
+    // Lookup by post_slug column in your DB
+    const { data: existing, error: selectError } = await supabase
+      .from('likes')
+      .select('likes')
+      .eq('post_slug', slug)
+      .maybeSingle()
+
+    if (selectError) {
+      console.error('supabase select error', selectError)
+      return NextResponse.json({ ok: false, error: selectError.message }, { status: 500 })
     }
 
-    // fallback: use slug
-    const { data: existingSlug } = await supabase.from('likes').select('likes').eq('slug', slug).maybeSingle()
-    if (existingSlug) {
+    if (existing) {
       const delta = action === 'decrement' ? -1 : 1
-      const newLikes = Math.max(0, (existingSlug.likes ?? 0) + delta)
-      await supabase.from('likes').update({ likes: newLikes }).eq('slug', slug)
+      const newLikes = Math.max(0, (existing.likes ?? 0) + delta)
+      const { error: updateError } = await supabase
+        .from('likes')
+        .update({ likes: newLikes })
+        .eq('post_slug', slug)
+
+      if (updateError) {
+        console.error('supabase update error', updateError)
+        return NextResponse.json({ ok: false, error: updateError.message }, { status: 500 })
+      }
+
       return NextResponse.json({ ok: true, likes: newLikes })
-    } else {
-      const insert = { post_id: null, slug, likes: action === 'decrement' ? 0 : 1 }
-      await supabase.from('likes').insert(insert)
-      return NextResponse.json({ ok: true, likes: insert.likes })
     }
+
+    // create new row
+    const insert = { post_slug: slug, likes: action === 'decrement' ? 0 : 1 }
+    const { data: inserted, error: insertError } = await supabase
+      .from('likes')
+      .insert(insert)
+      .select()
+      .maybeSingle()
+
+    if (insertError) {
+      console.error('supabase insert error', insertError)
+      return NextResponse.json({ ok: false, error: insertError.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ ok: true, likes: inserted?.likes ?? insert.likes, row: inserted ?? insert })
   } catch (err: any) {
     return NextResponse.json({ ok: false, error: err?.message ?? String(err) }, { status: 500 })
   }
