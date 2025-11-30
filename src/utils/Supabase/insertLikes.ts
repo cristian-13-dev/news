@@ -50,10 +50,4 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({ ok: true, row: data ?? { post_slug: slugString, likes: 0 } })
-
-  if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json({ ok: true })
 }
