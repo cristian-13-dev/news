@@ -1,4 +1,5 @@
-import { sanityFetch, client } from "@/lib/sanity";
+import { sanityFetch } from "@/../../sanity/lib/live";
+import { client } from "@/lib/sanity";
 import { POST_BY_SLUG_QUERY, POST_SLUGS_QUERY } from "@/lib/queries";
 import { PortableText } from "@portabletext/react";
 import { notFound } from "next/navigation";
@@ -71,9 +72,8 @@ export async function generateStaticParams() {
   return posts.map((post) => ({ slug: post.slug }));
 }
 
-export default async function PostPage(props: any) {
-  const resolvedParams = await Promise.resolve(props?.params);
-  const { slug } = resolvedParams as { slug: string };
+export default async function PostPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
 
   const post = await fetchPost(slug);
 
