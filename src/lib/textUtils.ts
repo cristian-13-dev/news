@@ -157,3 +157,15 @@ export function isWithinDays(dateInput?: string | Date | number, days = 3) {
   const msInDay = 24 * 60 * 60 * 1000;
   return diffMs >= 0 && diffMs <= days * msInDay;
 }
+
+export function timeAgo(dateInput?: string | Date | number) {
+  if (!dateInput) return "";
+  const date = new Date(dateInput as any);
+  if (isNaN(date.getTime())) return "";
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+  if (seconds < 30 * 86400) return `${Math.floor(seconds / 86400)}d`;
+  return formatDate(date.toISOString());
+}

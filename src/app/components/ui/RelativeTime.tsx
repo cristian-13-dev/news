@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { formatDate, timeAgo } from "@/lib/utils"
+import { formatDate, timeAgo } from "@/lib/textUtils"
 
 interface RelativeTimeProps {
   date?: string

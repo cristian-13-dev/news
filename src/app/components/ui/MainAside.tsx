@@ -8,11 +8,11 @@ import Link from "next/link";
 
 export default async function MainAside() {
   const posts = (await client.fetch(POSTS_QUERY)) as PostPreview[];
-  const slugs = posts.map((post) =>
-    typeof post.slug === "string"
-      ? post.slug
-      : post.slug?.current ?? ""
-  ).filter(Boolean);
+  const slugs = posts
+    .map((post) =>
+      typeof post.slug === "string" ? post.slug : (post.slug?.current ?? "")
+    )
+    .filter(Boolean);
 
   // Fetch likes map for all slugs
   const likesMap = await getLikesBySlugs(slugs);
@@ -24,13 +24,24 @@ export default async function MainAside() {
       </div>
 
       <Suspense fallback={<Spinner />}>
-        {posts.map((post) => {
-          const slug = typeof post.slug === "string" ? post.slug : post.slug?.current ?? "";
+        <div className="mt-4 flex flex-col gap-3">
+          {posts.map((post) => {
+            const slug =
+              typeof post.slug === "string"
+                ? post.slug
+                : (post.slug?.current ?? "");
 
-          return (
-            <Link key={slug} href={`/articles/${slug}`}>{post.title}</Link>
-          );
-        })}
+            return (
+              <Link
+                key={slug}
+                href={`/articles/${slug}`}
+                className="text-sm hover:underline"
+              >
+                <div>{post.title}</div>
+              </Link>
+            );
+          })}
+        </div>
       </Suspense>
     </aside>
   );
