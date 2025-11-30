@@ -1,13 +1,17 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL = process.env.SUPABASE_URL ?? ''
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
+/**
+ * Return a Supabase admin client created with server-only env vars.
+ * This is lazy (created at request time) so importing this module during
+ * Next.js build won't throw if server env vars are missing.
+ */
+export function getSupabaseAdmin(): SupabaseClient {
+  const SUPABASE_URL = process.env.SUPABASE_URL
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  // Keep this file importable during dev even if env vars are missing.
-  // Runtime calls will fail if env vars are not set.
-  // eslint-disable-next-line no-console
-  console.warn('Supabase admin client created without SUPABASE_URL or SERVICE_ROLE_KEY')
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in server environment')
+  }
+
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 }
-
-export const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from './supabase-admin'
+import { getSupabaseAdmin } from './supabase-admin'
 
 const SANITY_WEBHOOK_SECRET = process.env.SANITY_WEBHOOK_SECRET
 
@@ -20,6 +20,13 @@ export async function POST(req: Request) {
 
   if (!slug || docType !== 'post') {
     return NextResponse.json({ ok: false, error: 'Not a post or missing slug' }, { status: 400 })
+  }
+
+  let supabaseAdmin
+  try {
+    supabaseAdmin = getSupabaseAdmin()
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e?.message ?? 'Server env not configured' }, { status: 500 })
   }
 
   const { error } = await supabaseAdmin
