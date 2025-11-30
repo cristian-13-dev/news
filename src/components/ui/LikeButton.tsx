@@ -31,7 +31,7 @@ export default function LikeButton({ postId, initialCount = 0 }: Props) {
     }
   }, [postId, initialCount]);
 
-  const toggle = () => {
+  const toggle = async () => {
     try {
       const stored = localStorage.getItem("liked_posts");
       const likedPosts: string[] = stored ? JSON.parse(stored) : [];
@@ -64,6 +64,21 @@ export default function LikeButton({ postId, initialCount = 0 }: Props) {
         }, 1500);
       }
     } catch (e) {
+    }
+
+    // Fire-and-forget server update to persist likes (use postId as the key)
+    try {
+      const resp = await fetch('/api/likes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId, action: liked ? 'decrement' : 'increment' }),
+      })
+      const json = await resp.json()
+      if (json?.ok && typeof json?.likes === 'number') {
+        setCount(json.likes)
+      }
+    } catch (e) {
+      console.error('Failed to persist like', e)
     }
   };
 
