@@ -112,7 +112,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         )}
 
         <div className="mt-16 pt-8 border-t border-gray-200">
-          <BackButton href="/posts" label="Back to all posts" />
+          <BackButton href="/articles" label="Back to all posts" />
         </div>
       </main>
     </article>

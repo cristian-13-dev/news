@@ -23,10 +23,8 @@ type PostPreview = {
 
 export default async function MainPage() {
   const posts = (await client.fetch(POSTS_QUERY)) as PostPreview[];
-
-  posts.forEach((post) => {
-    const raw = post.excerpt ?? plainTextFromPortableText(post.body);
-  });
+  const getSlug = (s: PostPreview["slug"]) =>
+    typeof s === "string" ? s : s?.current ?? "";
 
   return (
     <main className="max-w-4xl mx-auto px-6 py-6">
@@ -41,8 +39,7 @@ export default async function MainPage() {
 
       <section className="divide-y divide-gray-200">
         {posts.map((post) => {
-          const slug =
-            typeof post.slug === "string" ? post.slug : post.slug?.current;
+          const postUrl = `/articles/${getSlug(post.slug)}`;
           const rawText = post.excerpt ?? plainTextFromPortableText(post.body);
           const description = rawText;
 
@@ -71,10 +68,7 @@ export default async function MainPage() {
                   </div>
                 </div>
 
-                <Link
-                  href={`/posts/${slug}`}
-                  className="text-xl md:text-2xl font-bold text-black hover:underline inline-flex items-center"
-                >
+                <Link href={postUrl} className="text-xl md:text-2xl font-bold text-black hover:underline inline-flex items-center">
                   <span className="">
                     {isWithinDays(post.publishedAt, 3) && (
                       <span
@@ -128,10 +122,7 @@ export default async function MainPage() {
 
                 {post.imageUrl && (
                 <div className="hidden md:block md:col-span-1">
-                  <Link
-                    href={`/articles/${slug}`}
-                    className="block rounded-lg overflow-hidden shadow-sm"
-                  >
+                  <Link href={postUrl} className="block rounded-lg overflow-hidden shadow-sm">
                     <img
                       src={post.imageUrl}
                       alt={post.title}
