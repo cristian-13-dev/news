@@ -1,4 +1,4 @@
-import { sanityFetch } from '@/lib/sanity'
+import { sanityFetch } from '@/../../sanity/lib/live'
 import { POSTS_QUERY } from '@/lib/queries'
 import { PostCard } from '@/app/components/ui/PostCard'
 import type { PostListItem } from '@/types/sanity'

@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { urlFor } from '@/lib/sanity'
-import { formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/textUtils'
 import { CategoryBadges } from './CategoryBadges'
 import type { PostListItem } from '@/types/sanity'
 

@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
-import { formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/textUtils'
 import type { Author as AuthorType } from '@/types/sanity'
 
 interface AuthorInfoProps {

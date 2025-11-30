@@ -143,3 +143,17 @@ export function plainTextFromPortableText(body: any): string {
   }
   return parts.join(" ").replace(/\s+/g, " ").trim();
 }
+
+/**
+ * Returns true if the given date (string | Date | number) is within the
+ * specified number of days from now. Returns false for invalid or missing dates.
+ */
+export function isWithinDays(dateInput?: string | Date | number, days = 3) {
+  if (!dateInput) return false;
+  const date = new Date(dateInput as any);
+  if (isNaN(date.getTime())) return false;
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const msInDay = 24 * 60 * 60 * 1000;
+  return diffMs >= 0 && diffMs <= days * msInDay;
+}

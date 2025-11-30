@@ -1,4 +1,5 @@
-import { sanityFetch, client } from "@/lib/sanity";
+import { sanityFetch } from "@/../../sanity/lib/live";
+import { client } from "@/lib/sanity";
 import { POST_BY_SLUG_QUERY, POST_SLUGS_QUERY } from "@/lib/queries";
 import { PortableText } from "@portabletext/react";
 import { notFound } from "next/navigation";
