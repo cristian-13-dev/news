@@ -69,7 +69,7 @@ export default async function MainAside() {
                   <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
                     <span className="truncate">{post.author?.name ?? "Editorial"}</span>
                     <span>·</span>
-                    <span>{timeAgo(post.publishedAt)}</span>
+                    <span>{timeAgo(post.publishedAt)} ago</span>
                     <span className="ml-auto flex items-center gap-1 text-gray-600">
                     {/* Lucide Heart Icon */}
                     <svg
