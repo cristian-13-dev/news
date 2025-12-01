@@ -1,6 +1,6 @@
 import { sanityFetch } from "@/../../sanity/lib/live";
 import { client } from "@/lib/sanity";
-import { POST_BY_SLUG_QUERY, POST_SLUGS_QUERY } from "@/lib/queries";
+import { POST_BY_SLUG_QUERY, POSTS_WITH_META_QUERY } from "@/lib/queries";
 import { PortableText } from "@portabletext/react";
 import { notFound } from "next/navigation";
 import { components } from "@/app/components/PortableTextComponents";
@@ -24,26 +24,22 @@ async function fetchPost(slug: string): Promise<Post | null> {
 }
 
 async function fetchPostMeta(slug: string) {
-  return client.fetch(
-    `*[_type == "post" && slug.current == $slug][0]{
-      title,
-      "description": coalesce(excerpt, pt::text(body)[0..150]),
-      "imageUrl": mainImage.asset->url,
-      publishedAt,
-      "authorName": author->name
-    }`,
-    { slug }
-  );
+  return client.fetch(POSTS_WITH_META_QUERY, { slug });
 }
 
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string; description?: string }> },
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const resolvedParams = (await params) as { slug: string; description?: string };
+  const resolvedParams = (await params) as {
+    slug: string;
+    description?: string;
+  };
   const { slug, description } = resolvedParams;
 
-  const meta = description ? { title: undefined, description } : await fetchPostMeta(slug);
+  const meta = description
+    ? { title: undefined, description }
+    : await fetchPostMeta(slug);
 
   if (!meta) return { title: "Post" };
 
@@ -57,7 +53,9 @@ export async function generateMetadata(
       description: (meta as any).description || undefined,
       type: "article",
       publishedTime: (meta as any).publishedAt,
-      authors: (meta as any).authorName ? [(meta as any).authorName] : undefined,
+      authors: (meta as any).authorName
+        ? [(meta as any).authorName]
+        : undefined,
       url,
       images: (meta as any).imageUrl
         ? [{ url: (meta as any).imageUrl, alt: (meta as any).title }]
@@ -67,14 +65,23 @@ export async function generateMetadata(
 }
 
 export async function generateStaticParams() {
-  const posts = await client.fetch<Array<{ slug: string; description?: string }>>(
+  const posts = await client.fetch<
+    Array<{ slug: string; description?: string }>
+  >(
     `*[_type == "post"]{ "slug": slug.current, "description": coalesce(excerpt, pt::text(body)[0..150]) }`
   );
 
-  return posts.map((post) => ({ slug: post.slug, description: post.description }));
+  return posts.map((post) => ({
+    slug: post.slug,
+    description: post.description,
+  }));
 }
 
-export default async function PostPage({ params }: { params: Promise<{ slug: string; description?: string }> }) {
+export default async function PostPage({
+  params,
+}: {
+  params: Promise<{ slug: string; description?: string }>;
+}) {
   const resolvedParams = await params;
   const { slug } = resolvedParams as { slug: string; description?: string };
 
