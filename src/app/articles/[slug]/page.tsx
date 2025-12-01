@@ -4,7 +4,6 @@ import { POST_BY_SLUG_QUERY, POST_SLUGS_QUERY } from "@/lib/queries";
 import { PortableText } from "@portabletext/react";
 import { notFound } from "next/navigation";
 import { components } from "@/app/components/PortableTextComponents";
-import { PageHeader } from "@/app/components/ui/PageHeader";
 import { BackButton } from "@/app/components/ui/BackButton";
 import { CategoryBadges } from "@/app/components/ui/CategoryBadges";
 import { AuthorInfo } from "@/app/components/ui/AuthorInfo";
