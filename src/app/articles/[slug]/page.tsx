@@ -1,7 +1,7 @@
 import { sanityFetch } from "@/../../sanity/lib/live";
 import { client } from "@/lib/sanity";
 import { POST_BY_SLUG_QUERY, POSTS_WITH_META_QUERY } from "@/lib/queries";
-import { PortableText } from "@portabletext/react";
+import PortableTextClient from "@/app/components/PortableTextClient";
 import { notFound } from "next/navigation";
 import { components } from "@/app/components/PortableTextComponents";
 import { BackButton } from "@/app/components/ui/BackButton";
@@ -114,7 +114,7 @@ export default async function PostPage({
 
         {post?.body && (
           <div className="prose prose-lg prose-gray max-w-none">
-            <PortableText value={post.body} components={components} />
+            <PortableTextClient value={post.body} />
           </div>
         )}
 
