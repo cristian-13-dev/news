@@ -5,8 +5,7 @@ import { Table } from '@/components/ui/Table'
 import { Video } from '@/components/ui/Video'
 import { Comparison } from '@/components/ui/Comparison'
 import { ProsCons } from '@/components/ui/ProsCons'
-import dynamic from 'next/dynamic'
-const DynamicChartWrapper = dynamic(() => import('./ui/ChartWrapper'), { ssr: false })
+// Server-safe: do not import client-only chart components here.
 
 export const components: PortableTextComponents = {
   block: {
@@ -120,8 +119,8 @@ export const components: PortableTextComponents = {
       return <ProsCons value={value} />
     },
     chart: ({ value }) => {
-      if (!value) return null;
-      return <DynamicChartWrapper value={value} />;
+      // Charts are rendered in a client boundary (`PortableTextClient`).
+      return null;
     },
     timeline: ({ value }) => {
       if (!value) return null;
@@ -140,8 +139,8 @@ export const components: PortableTextComponents = {
     },
     // Backwards-compatible legacy block type `barChart`
     barChart: ({ value }) => {
-      if (!value) return null;
-      return <ChartWrapper value={value} />;
+      // Legacy barChart blocks are handled in the client renderer.
+      return null;
     },
   },
 }
