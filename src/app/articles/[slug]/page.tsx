@@ -8,6 +8,8 @@ import { BackButton } from "@/app/components/ui/BackButton";
 import { CategoryBadges } from "@/app/components/ui/CategoryBadges";
 import { AuthorInfo } from "@/app/components/ui/AuthorInfo";
 import { PostImage } from "@/app/components/ui/PostImage";
+import LikeButton from "@/components/ui/LikeButton";
+import { readingTime } from "@/lib/textUtils";
 import type { Post } from "@/types/sanity";
 import type { Metadata, ResolvingMetadata } from "next";
 import { SITE_URL } from "@/lib/website";
@@ -91,6 +93,15 @@ export default async function PostPage({
     notFound();
   }
 
+  let initialLikes = 0;
+  try {
+    const resp = await fetch(
+      `${SITE_URL}/api/likes?slug=${encodeURIComponent(slug)}`
+    );
+    const json = await resp.json();
+    if (json?.ok && typeof json?.likes === "number") initialLikes = json.likes;
+  } catch (e) {}
+
   return (
     <article className="min-h-screen">
       <main className="max-w-4xl mx-auto px-6 py-12">
@@ -101,9 +112,16 @@ export default async function PostPage({
         </h1>
 
         <div className="mb-10 pb-8 border-b border-gray-200">
-          {post?.author && (
-            <AuthorInfo author={post.author} publishedAt={post.publishedAt} />
-          )}
+          <div className="flex items-start justify-between gap-4">
+            {post?.author && (
+              <AuthorInfo author={post.author} publishedAt={post.publishedAt} />
+            )}
+
+            <div className="flex flex-col items-center ml-auto">
+              <p className="text-sm text-black/60">{readingTime(post.body)}</p>
+              <LikeButton slug={slug} initialCount={initialLikes} />
+            </div>
+          </div>
         </div>
 
         {post?.body && (

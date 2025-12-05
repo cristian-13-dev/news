@@ -27,8 +27,7 @@ export default function LikeButton({ slug, initialCount = 0 }: Props) {
         localStorage.setItem(`likes_${slug}`, String(initialCount));
         setCount(initialCount);
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }, [slug, initialCount]);
 
   const toggle = async () => {
@@ -55,32 +54,30 @@ export default function LikeButton({ slug, initialCount = 0 }: Props) {
         localStorage.setItem(`likes_${slug}`, String(nextCount));
         setCount(nextCount);
         setLiked(true);
-         setShowBorder(true);
+        setShowBorder(true);
         if (timerRef.current) clearTimeout(timerRef.current);
         timerRef.current = window.setTimeout(() => {
           setShowBorder(false);
           timerRef.current = null;
         }, 1500);
       }
-    } catch (e) {
-    }
+    } catch (e) {}
 
-    
     try {
-      const resp = await fetch('/api/likes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, action: liked ? 'decrement' : 'increment' }),
-      })
-      const json = await resp.json()
-      if (json?.ok && typeof json?.likes === 'number') {
-        setCount(json.likes)
+      const resp = await fetch("/api/likes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug,
+          action: liked ? "decrement" : "increment",
+        }),
+      });
+      const json = await resp.json();
+      if (json?.ok && typeof json?.likes === "number") {
+        setCount(json.likes);
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   };
-
-  
 
   useEffect(() => {
     return () => {
@@ -91,25 +88,24 @@ export default function LikeButton({ slug, initialCount = 0 }: Props) {
   }, []);
 
   return (
-    <div className="inline-flex items-center gap-2">
+    <div className="w-full flex justify-end">
       <button
         onClick={toggle}
-      aria-pressed={liked}
-      aria-label={liked ? "Unlike post" : "Like post"}
-      className={`inline-flex items-center text-sm font-medium transition-all duration-150 focus:outline-none rounded-full px-2 py-1 ${
-        liked ? "text-rose-600" : "text-black/60"
-      } ${showBorder ? "ring-2 ring-rose-300 ring-offset-1" : ""}`}
-    >
-      <span
-        className={`flex items-center justify-center rounded-full p-1 transition-transform ${
-          liked ? "scale-105" : ""
-        }`}
+        aria-pressed={liked}
+        aria-label={liked ? "Unlike post" : "Like post"}
+        className={`inline-flex items-center text-sm font-medium transition-all duration-150 focus:outline-none rounded-full ${
+          liked ? "text-rose-600" : "text-black/60"
+        } ${showBorder ? "ring-2 ring-rose-300 ring-offset-1" : ""}`}
       >
-        <Heart size={16} className={liked ? "fill-current" : ""} />
-      </span>
-      <span className="text-xs tabular-nums">{count}</span>
-    </button>
-      
+        <span
+          className={`flex items-center justify-center rounded-full p-1 transition-transform ${
+            liked ? "scale-105" : ""
+          }`}
+        >
+          <Heart size={16} className={liked ? "fill-current" : ""} />
+        </span>
+        <span className="text-xs tabular-nums">{count}</span>
+      </button>
     </div>
   );
 }
