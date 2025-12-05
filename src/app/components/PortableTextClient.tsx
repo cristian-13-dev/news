@@ -10,6 +10,31 @@ import { Comparison } from "@/components/ui/Comparison";
 import { ProsCons } from "@/components/ui/ProsCons";
 
 export default function PortableTextClient({ value }: { value: any }) {
+  function getContrastColor(hex: string) {
+    try {
+      const c = hex.replace('#', '')
+      const r = parseInt(c.substring(0, 2), 16)
+      const g = parseInt(c.substring(2, 4), 16)
+      const b = parseInt(c.substring(4, 6), 16)
+      const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+      return luminance > 0.6 ? '#000000' : '#ffffff'
+    } catch (e) {
+      return '#000000'
+    }
+  }
+
+  function hexToRgba(hex: string, alpha = 0.35) {
+    try {
+      const c = hex.replace('#', '')
+      const r = parseInt(c.substring(0, 2), 16)
+      const g = parseInt(c.substring(2, 4), 16)
+      const b = parseInt(c.substring(4, 6), 16)
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`
+    } catch (e) {
+      return hex
+    }
+  }
+
   const components: any = {
     block: {
       blockquote: ({ children }: any) => (
@@ -55,6 +80,29 @@ export default function PortableTextClient({ value }: { value: any }) {
         <strong className="font-bold text-gray-900">{children}</strong>
       ),
       em: ({ children }: any) => <em className="italic">{children}</em>,
+      marker: ({ children, value }: any) => {
+        const hex = value?.color || '#000000'
+        const bg = hexToRgba(hex, 0.35)
+        const color = getContrastColor(hex)
+        return (
+          <span
+            style={{
+              backgroundColor: bg,
+              color,
+              padding: '0.08em 0.18em',
+              borderRadius: '0.25em',
+              display: 'inline',
+              lineHeight: 1.2,
+              boxDecorationBreak: 'clone',
+              WebkitBoxDecorationBreak: 'clone',
+              boxShadow: 'inset 0 -0.12em rgba(0,0,0,0.06)'
+            }}
+            className="inline-block"
+          >
+            {children}
+          </span>
+        )
+      },
       link: ({ children, value }: any) => {
         const href = value?.href || "";
         return (

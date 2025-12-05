@@ -7,6 +7,32 @@ import { Comparison } from '@/components/ui/Comparison'
 import { ProsCons } from '@/components/ui/ProsCons'
 // Server-safe: do not import client-only chart components here.
 
+function getContrastColor(hex: string) {
+  try {
+    const c = hex.replace('#', '')
+    const r = parseInt(c.substring(0, 2), 16)
+    const g = parseInt(c.substring(2, 4), 16)
+    const b = parseInt(c.substring(4, 6), 16)
+    // Relative luminance
+    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+    return luminance > 0.6 ? '#000000' : '#ffffff'
+  } catch (e) {
+    return '#000000'
+  }
+}
+
+function hexToRgba(hex: string, alpha = 0.35) {
+  try {
+    const c = hex.replace('#', '')
+    const r = parseInt(c.substring(0, 2), 16)
+    const g = parseInt(c.substring(2, 4), 16)
+    const b = parseInt(c.substring(4, 6), 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  } catch (e) {
+    return hex
+  }
+}
+
 export const components: PortableTextComponents = {
   block: {
     blockquote: ({ children }) => (
@@ -70,6 +96,30 @@ export const components: PortableTextComponents = {
     em: ({ children }) => (
       <em className="italic">{children}</em>
     ),
+    marker: ({ children, value }) => {
+      const hex = value?.color || '#000000'
+      // Use a translucent background to mimic a marker/highlighter
+      const bg = hexToRgba(hex, 0.35)
+      const color = getContrastColor(hex)
+      return (
+        <span
+          style={{
+            backgroundColor: bg,
+            color,
+            padding: '0.08em 0.18em',
+            borderRadius: '0.25em',
+            display: 'inline',
+            lineHeight: 1.2,
+            boxDecorationBreak: 'clone',
+            WebkitBoxDecorationBreak: 'clone',
+            // subtle inner edge to give it a marker look
+            boxShadow: 'inset 0 -0.12em rgba(0,0,0,0.06)'
+          }}
+        >
+          {children}
+        </span>
+      )
+    },
     link: ({ children, value }) => {
       const href = value?.href || ''
       return (
