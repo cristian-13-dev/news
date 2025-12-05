@@ -106,12 +106,6 @@ export default async function PostPage({
           )}
         </div>
 
-        {post?.mainImage && (
-          <div className="mb-10">
-            <PostImage image={post.mainImage} title={post.title} priority />
-          </div>
-        )}
-
         {post?.body && (
           <div className="prose prose-lg prose-gray max-w-none">
             <PortableTextClient value={post.body} />

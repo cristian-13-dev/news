@@ -3,17 +3,6 @@ import {ImageIcon, BlockquoteIcon} from '@sanity/icons'
 import {BlockquoteRenderer, BarChartRenderer} from '../components'
 import React from 'react'
 
-/**
- * This is the schema type for block content used in the post document type
- * Importing this type into the studio configuration's `schema` property
- * lets you reuse it in other document types with:
- *  {
- *    name: 'someName',
- *    title: 'Some title',
- *    type: 'blockContent'
- *  }
- */
-
 export const blockContentType = defineType({
   title: 'Block Content',
   name: 'blockContent',
@@ -21,10 +10,7 @@ export const blockContentType = defineType({
   of: [
     defineArrayMember({
       type: 'block',
-      // Styles let you define what blocks can be marked up as. The default
-      // set corresponds with HTML tags, but you can set any title or value
-      // you want, and decide how you want to deal with it where you want to
-      // use your content.
+
       styles: [
         {title: 'Normal', value: 'normal'},
         {title: 'H1', value: 'h1'},
@@ -39,15 +25,12 @@ export const blockContentType = defineType({
         },
       ],
       lists: [{title: 'Bullet', value: 'bullet'}],
-      // Marks let you mark up inline text in the Portable Text Editor
       marks: {
-        // Decorators usually describe a single property – e.g. a typographic
-        // preference or highlighting
+
         decorators: [
           {title: 'Strong', value: 'strong'},
           {title: 'Emphasis', value: 'em'},
         ],
-        // Annotations can be any object structure – e.g. a link or a footnote.
         annotations: [
           {
             title: 'Marker',
@@ -61,13 +44,8 @@ export const blockContentType = defineType({
                 options: {
                   list: [
                     { title: 'Red', value: '#f07165' },
-                    { title: 'Orange', value: '#f0b665' },
-                    { title: 'Yellow', value: '#ffde82' },
                     { title: 'Green', value: '#7ad46e' },
-                    { title: 'Blue', value: '#6ecceb' },
-                    { title: 'Indigo', value: '#8679f7' },
-                    { title: 'Purple', value: '#bc79f7' },
-                    { title: 'Pink', value: '#fa89cf' },
+                    { title: 'Yellow', value: '#ffde82' },
                   ],
                 },
               },
@@ -88,9 +66,7 @@ export const blockContentType = defineType({
         ],
       },
     }),
-    // You can add additional types here. Note that you can't use
-    // primitive types such as 'string' and 'number' in the same array
-    // as a block type.
+
     defineArrayMember({
       type: 'image',
       icon: ImageIcon,
@@ -123,9 +99,7 @@ export const blockContentType = defineType({
         }
       }
     }),
-    // Keep a hidden legacy member for backward compatibility so existing
-    // documents with `_type: 'barChart'` remain valid, but hide it from
-    // the editor insert menu to avoid duplicates.
+
     defineArrayMember({
       type: 'barChart',
       components: {
